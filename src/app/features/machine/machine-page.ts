@@ -1,42 +1,92 @@
-import { Component } from '@angular/core';
-import { EmptyNote } from '../../shell/empty-note';
+import { Component, computed, inject } from '@angular/core';
+import { GcodeService } from '../../core/gcode.service';
 import { ViewportPlaceholder } from '../../shell/viewport-placeholder';
 import { WorkspaceLayout } from '../../shell/workspace-layout';
+import { GcodeViewer } from '../../ui/gcode-viewer/gcode-viewer';
 import { PanelSection } from '../../ui/panel/panel-section';
+import { Tile } from '../../ui/tile/tile';
+import { ConnectionSection } from './connection-section';
+import { ConsoleLog } from './console-log';
+import { JobBar } from './job-bar';
+import { JobSection } from './job-section';
+import { formatCoordinate } from './machine-format';
+import { PositionSection } from './position-section';
 
-/** Machine workspace: serial connection, live engraving and job controls. Placeholder content. */
+/** Machine workspace: serial connection, live engraving and job controls. The 3D viewport is still a placeholder. */
 @Component({
   selector: 'app-machine-page',
-  imports: [WorkspaceLayout, PanelSection, EmptyNote, ViewportPlaceholder],
+  imports: [
+    WorkspaceLayout,
+    PanelSection,
+    ViewportPlaceholder,
+    GcodeViewer,
+    Tile,
+    ConnectionSection,
+    PositionSection,
+    JobSection,
+    ConsoleLog,
+    JobBar,
+  ],
   template: `
     <app-workspace-layout leftLabel="Machine status" rightLabel="Live G-code">
       <app-panel-section left heading="Connection">
-        <app-empty-note>Not connected. Choose a serial port to connect.</app-empty-note>
+        <app-connection-section />
       </app-panel-section>
       <app-panel-section left heading="Position">
-        <app-empty-note>The laser position is unknown until the machine is connected.</app-empty-note>
+        <app-position-section />
       </app-panel-section>
       <app-panel-section left heading="Job">
-        <app-empty-note>No job running. Load a Gerber in Design to prepare one.</app-empty-note>
+        <app-job-section />
       </app-panel-section>
       <app-panel-section left heading="Console">
-        <app-empty-note>No machine output yet.</app-empty-note>
+        <app-console-log />
       </app-panel-section>
 
       <app-viewport-placeholder>The 3D viewport will go here.</app-viewport-placeholder>
+      <app-job-bar />
 
       <app-panel-section right heading="Current move">
-        <app-empty-note>No move yet. Start a job to follow the laser.</app-empty-note>
+        <div class="tiles" role="group" aria-label="Current move in millimetres">
+          <app-tile label="X" unit="mm" [value]="x()" />
+          <app-tile label="Y" unit="mm" [value]="y()" />
+        </div>
       </app-panel-section>
-      <app-panel-section right heading="G-code">
-        <app-empty-note>Nothing streaming. Start a job to see live G-code.</app-empty-note>
-      </app-panel-section>
+      <app-gcode-viewer
+        right
+        heading="G-code"
+        emptyMessage="Nothing streaming. Start a job to see live G-code."
+        [lines]="gcode.lines()"
+        [currentLine]="gcode.currentLine()"
+        [showExport]="false"
+      />
     </app-workspace-layout>
   `,
   styles: `
     :host {
       display: contents;
     }
+
+    /* The right panel is a flex column: the tiles keep their natural height, the viewer takes the rest. */
+    app-panel-section[right] {
+      flex: none;
+    }
+
+    .tiles {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-2);
+    }
+
+    app-gcode-viewer {
+      flex: 1;
+      min-height: 160px;
+    }
   `,
 })
-export class MachinePage {}
+export class MachinePage {
+  protected readonly gcode = inject(GcodeService);
+
+  private readonly move = computed(() => this.gcode.currentPosition());
+  protected readonly x = computed(() => formatCoordinate(this.move()?.x));
+  protected readonly y = computed(() => formatCoordinate(this.move()?.y));
+}
