@@ -6,6 +6,7 @@ import { routes } from './app.routes';
 import { GcodeService } from './core/gcode.service';
 import { MachineService } from './core/machine.service';
 import { WindowService } from './core/window.service';
+import { NO_WEBGL } from './ui/peg-board-viewport/scene-factory.testing';
 
 describe('App', () => {
   beforeEach(() => {
@@ -13,6 +14,7 @@ describe('App', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter(routes),
+        NO_WEBGL,
         {
           provide: WindowService,
           useValue: {

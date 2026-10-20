@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { NO_WEBGL } from '../../ui/peg-board-viewport/scene-factory.testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { GcodeService } from '../../core/gcode.service';
@@ -7,7 +8,7 @@ import { MachinePage } from './machine-page';
 
 describe('MachinePage', () => {
   async function setup() {
-    TestBed.configureTestingModule({ providers: [provideRouter([{ path: 'machine', component: MachinePage }])] });
+    TestBed.configureTestingModule({ providers: [NO_WEBGL, provideRouter([{ path: 'machine', component: MachinePage }])] });
     const harness = await RouterTestingHarness.create('/machine');
     return { harness, el: harness.routeNativeElement as HTMLElement };
   }
@@ -24,15 +25,16 @@ describe('MachinePage', () => {
     expect(right.textContent).toContain('Nothing streaming. Start a job to see live G-code.');
   });
 
-  it('labels the panels and puts the viewport placeholder and job bar in main', async () => {
+  it('labels the panels and puts the read-only viewport and job bar in main', async () => {
     const { el } = await setup();
     const labels = Array.from(el.querySelectorAll('app-panel')).map((p) => p.getAttribute('aria-label'));
     expect(labels).toEqual(['Machine status', 'Live G-code']);
     const main = el.querySelector('main') as HTMLElement;
-    expect(main.textContent).toContain('3D viewport');
+    expect(main.querySelector('app-board-viewport')).not.toBeNull();
+    expect(main.querySelector('[aria-label="Board tools"]')).toBeNull();
     expect(main.querySelector('app-job-bar')).not.toBeNull();
     const children = Array.from(main.children).map((c) => c.tagName.toLowerCase());
-    expect(children.indexOf('app-viewport-placeholder')).toBeLessThan(children.indexOf('app-job-bar'));
+    expect(children.indexOf('app-board-viewport')).toBeLessThan(children.indexOf('app-job-bar'));
   });
 
   it('shows dashes for the position and current move when nothing is known', async () => {

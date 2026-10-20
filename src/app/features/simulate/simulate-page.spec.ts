@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { NO_WEBGL } from '../../ui/peg-board-viewport/scene-factory.testing';
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { GcodeService } from '../../core/gcode.service';
@@ -9,6 +10,7 @@ describe('SimulatePage', () => {
   async function setup(lines: readonly string[] = []) {
     TestBed.configureTestingModule({
       providers: [
+        NO_WEBGL,
         provideRouter([
           { path: 'simulate', component: SimulatePage },
           { path: 'design', children: [] },
@@ -32,14 +34,14 @@ describe('SimulatePage', () => {
     expect(headings(right)).toEqual(['Current move', 'G-code']);
   });
 
-  it('labels the panels and puts the viewport placeholder and controls in main', async () => {
+  it('labels the panels and puts the read-only viewport and controls in main', async () => {
     const { el } = await setup();
     const labels = Array.from(el.querySelectorAll('app-panel')).map((p) => p.getAttribute('aria-label'));
     expect(labels).toEqual(['Simulation summary', 'G-code progress']);
     const main = el.querySelector('main')!;
-    expect(main.textContent).toContain('3D viewport');
+    expect(main.querySelector('[aria-label="Board tools"]')).toBeNull();
     expect(Array.from(main.children).map((child) => child.tagName.toLowerCase())).toEqual([
-      'app-viewport-placeholder',
+      'app-board-viewport',
       'app-simulation-controls',
     ]);
   });

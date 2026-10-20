@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { ViewportPlaceholder } from '../../shell/viewport-placeholder';
+import { BoardViewport } from '../../shell/board-viewport';
 import { WorkspaceLayout } from '../../shell/workspace-layout';
 import { GcodeService } from '../../core/gcode.service';
 import { GcodeViewer } from '../../ui/gcode-viewer/gcode-viewer';
@@ -10,13 +10,13 @@ import { PlacementReadout } from './placement-readout';
 import { PlacementSection } from './placement-section';
 import { ProjectSection } from './project-section';
 
-/** Design workspace: load a Gerber, place it on the peg board, preview G-code. The 3D viewport is still a placeholder. */
+/** Design workspace: load a Gerber, place it on the peg board, preview G-code. The centre is the interactive peg-board viewport. */
 @Component({
   selector: 'app-design-page',
   imports: [
     WorkspaceLayout,
     PanelSection,
-    ViewportPlaceholder,
+    BoardViewport,
     ProjectSection,
     LayerList,
     PlacementSection,
@@ -39,7 +39,7 @@ import { ProjectSection } from './project-section';
         <app-engraving-section />
       </app-panel-section>
 
-      <app-viewport-placeholder>The 3D viewport will go here.</app-viewport-placeholder>
+      <app-board-viewport mode="design" />
 
       <app-panel-section right heading="Placement">
         <app-placement-readout />

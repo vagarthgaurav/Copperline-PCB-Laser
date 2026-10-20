@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { NO_WEBGL } from '../../ui/peg-board-viewport/scene-factory.testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { invoke } from '@tauri-apps/api/core';
@@ -10,7 +11,7 @@ vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn() }));
 
 describe('DesignPage', () => {
   async function setup() {
-    TestBed.configureTestingModule({ providers: [provideRouter([{ path: 'design', component: DesignPage }])] });
+    TestBed.configureTestingModule({ providers: [NO_WEBGL, provideRouter([{ path: 'design', component: DesignPage }])] });
     const harness = await RouterTestingHarness.create('/design');
     return harness.routeNativeElement as HTMLElement;
   }
@@ -33,17 +34,20 @@ describe('DesignPage', () => {
     expect(viewer.querySelector('ol')).toBeNull();
   });
 
-  it('labels the panels and shows the viewport placeholder in main', async () => {
+  it('labels the panels and puts the interactive viewport in main', async () => {
     const el = await setup();
     const labels = Array.from(el.querySelectorAll('app-panel')).map((p) => p.getAttribute('aria-label'));
     expect(labels).toEqual(['Project and placement settings', 'Placement readout and G-code']);
-    expect(el.querySelector('main')?.textContent).toContain('3D viewport');
+    const viewport = el.querySelector('main app-board-viewport');
+    expect(viewport).not.toBeNull();
+    expect(viewport?.querySelector('[aria-label="Board tools"]')).not.toBeNull();
+    expect(viewport?.textContent).toContain('Open a Gerber to place a board');
   });
 
   it('shows no digits as placeholder data', async () => {
     const el = await setup();
-    const text = Array.from(el.querySelectorAll('app-panel-section, main')).map((e) => e.textContent).join(' ');
-    expect(text.replace('3D', '')).not.toMatch(/\d/);
+    const text = Array.from(el.querySelectorAll('app-panel-section')).map((e) => e.textContent).join(' ');
+    expect(text).not.toMatch(/\d/);
   });
 
   it('puts the project section and the layer list in the Project and Layers sections', async () => {

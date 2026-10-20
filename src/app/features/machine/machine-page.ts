@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { GcodeService } from '../../core/gcode.service';
-import { ViewportPlaceholder } from '../../shell/viewport-placeholder';
+import { BoardViewport } from '../../shell/board-viewport';
 import { WorkspaceLayout } from '../../shell/workspace-layout';
 import { GcodeViewer } from '../../ui/gcode-viewer/gcode-viewer';
 import { PanelSection } from '../../ui/panel/panel-section';
@@ -12,13 +12,13 @@ import { JobSection } from './job-section';
 import { formatCoordinate } from './machine-format';
 import { PositionSection } from './position-section';
 
-/** Machine workspace: serial connection, live engraving and job controls. The 3D viewport is still a placeholder. */
+/** Machine workspace: serial connection, live engraving and job controls. The centre is the peg-board viewport following the live job. */
 @Component({
   selector: 'app-machine-page',
   imports: [
     WorkspaceLayout,
     PanelSection,
-    ViewportPlaceholder,
+    BoardViewport,
     GcodeViewer,
     Tile,
     ConnectionSection,
@@ -42,7 +42,7 @@ import { PositionSection } from './position-section';
         <app-console-log />
       </app-panel-section>
 
-      <app-viewport-placeholder>The 3D viewport will go here.</app-viewport-placeholder>
+      <app-board-viewport mode="machine" />
       <app-job-bar />
 
       <app-panel-section right heading="Current move">
