@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "pcb-laser",
+  "productName": "Copperline",
   "version": "0.1.0",
   "identifier": "com.vagarth.pcblaser",
   "build": {
@@ -12,9 +12,14 @@
   "app": {
     "windows": [
       {
-        "title": "PCB Laser",
-        "width": 800,
-        "height": 600,
+        "label": "main",
+        "title": "Copperline",
+        "decorations": false,
+        "width": 1440,
+        "height": 900,
+        "minWidth": 1100,
+        "minHeight": 700,
+        "center": true,
         "resizable": true,
         "fullscreen": false
       }
