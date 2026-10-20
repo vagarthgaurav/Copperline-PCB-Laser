@@ -1,0 +1,56 @@
+<div class="brand">
+  <span class="brand-mark" aria-hidden="true">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+      <path d="M5 7h5l4 4h5" />
+      <path d="M5 17h9" />
+      <circle cx="5" cy="7" r="1.4" fill="currentColor" stroke="none" />
+      <circle cx="19" cy="11" r="1.4" fill="currentColor" stroke="none" />
+      <circle cx="5" cy="17" r="1.4" fill="currentColor" stroke="none" />
+      <circle cx="14" cy="17" r="1.4" fill="currentColor" stroke="none" />
+    </svg>
+  </span>
+  <p class="brand-name">Copperline</p>
+</div>
+
+<div class="tabs" role="tablist" aria-label="Workspace">
+  @for (item of tabs; track item.id; let i = $index) {
+    <button
+      #tabButton
+      type="button"
+      class="tab"
+      role="tab"
+      [attr.aria-selected]="tab() === item.id"
+      [attr.tabindex]="tab() === item.id ? 0 : -1"
+      (click)="tab.set(item.id)"
+      (keydown)="onTabKeydown($event, i)"
+    >
+      <app-icon [name]="item.icon" [size]="16" />
+      {{ item.label }}
+    </button>
+  }
+</div>
+
+<div class="spacer" data-tauri-drag-region>
+  @if (fileName(); as name) {
+    <span class="filechip" data-tauri-drag-region>
+      <app-icon name="folder-open" [size]="16" />
+      <b>{{ name }}</b>
+      @if (fileDetail(); as detail) {
+        <span>· {{ detail }}</span>
+      }
+    </span>
+  }
+</div>
+
+<div class="actions">
+  <app-status-chip [status]="status()" [label]="statusLabel()" />
+  <button appButton iconOnly [attr.aria-label]="theme.toggleLabel()" (click)="theme.toggle()">
+    <app-icon [name]="themeIcon()" />
+  </button>
+  <button appButton variant="primary" [disabled]="exportDisabled()" (click)="exportRequested.emit()">
+    <app-icon name="download-simple" />
+    Export G-code
+  </button>
+  <span class="sep" aria-hidden="true"></span>
+  <app-window-controls />
+</div>
