@@ -1,0 +1,123 @@
+<div
+  #frame
+  class="viewport"
+  role="group"
+  aria-label="Peg board viewport"
+  [attr.aria-describedby]="hintId"
+  tabindex="0"
+  (keydown)="onKeydown($event)"
+>
+  <canvas
+    #canvas
+    role="img"
+    [attr.aria-label]="sceneLabel()"
+    [style.cursor]="cursor()"
+    (pointerdown)="onPointerDown($event)"
+    (pointermove)="onPointerMove($event)"
+    (pointerup)="onPointerEnd($event)"
+    (pointercancel)="onPointerEnd($event)"
+    (pointerleave)="onPointerLeave()"
+    (contextmenu)="onContextMenu($event)"
+  ></canvas>
+
+  <p class="sr-only" [id]="hintId">{{ viewHint }}</p>
+
+  @if (unavailable()) {
+    <p class="unavailable" role="status">{{ unavailableMessage }}</p>
+  }
+
+  <div class="ov tl seg" role="radiogroup" aria-label="Board side">
+    <label class="seg-item">
+      <input
+        type="radio"
+        [name]="sideGroup"
+        value="top"
+        [checked]="side() === 'top'"
+        (change)="onSideChange('top')"
+      />
+      <span>Top</span>
+    </label>
+    <label class="seg-item">
+      <input
+        type="radio"
+        [name]="sideGroup"
+        value="bottom"
+        [checked]="side() === 'bottom'"
+        (change)="onSideChange('bottom')"
+      />
+      <span>Bottom</span>
+    </label>
+  </div>
+
+  <div class="ov tc chip small" role="status" [attr.data-kind]="chip().kind">
+    <app-icon [name]="chip().icon" [size]="16" />
+    <span>{{ chip().text }}</span>
+  </div>
+
+  <div class="stack tr">
+    @if (interactive()) {
+      <div class="ov tools" role="group" aria-label="Board tools">
+        <button
+          type="button"
+          class="tool"
+          aria-label="Move board"
+          [attr.aria-pressed]="moveActive()"
+          (click)="toggleMove()"
+        >
+          <app-icon name="arrows-out-cardinal" [weight]="moveActive() ? 'fill' : 'regular'" />
+        </button>
+        <button type="button" class="tool" aria-label="Rotate 90 degrees" (click)="rotated.emit()">
+          <app-icon name="arrow-clockwise" />
+        </button>
+        <button type="button" class="tool" aria-label="Flip board" (click)="flipped.emit()">
+          <app-icon name="flip-horizontal" />
+        </button>
+      </div>
+    }
+
+    <div class="ov tools" role="group" aria-label="View">
+      <button
+        type="button"
+        class="tool"
+        aria-label="Zoom in"
+        aria-keyshortcuts="+"
+        title="Zoom in (+)"
+        (click)="zoomIn()"
+      >
+        <app-icon name="plus" />
+      </button>
+      <button
+        type="button"
+        class="tool"
+        aria-label="Zoom out"
+        aria-keyshortcuts="-"
+        title="Zoom out (-)"
+        (click)="zoomOut()"
+      >
+        <app-icon name="minus" />
+      </button>
+      <button
+        type="button"
+        class="tool"
+        aria-label="Reset view"
+        aria-keyshortcuts="0"
+        title="Reset view (0)"
+        (click)="resetView()"
+      >
+        <app-icon name="crosshair" />
+      </button>
+    </div>
+  </div>
+
+  <div class="ov bl pad">
+    <span class="label">Offset</span>
+    <span class="code" aria-live="polite">{{ offsetText() }}</span>
+  </div>
+
+  <ul class="ov br legend small" aria-label="Legend">
+    <li><span class="sw board"></span>Board</li>
+    <li><span class="sw copper"></span>Copper</li>
+    <li><span class="sw done"></span>Engraved</li>
+    <li><span class="sw laser"></span>Laser</li>
+  </ul>
+</div>

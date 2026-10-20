@@ -31,7 +31,7 @@ describe('Icon', () => {
 
   it('has path data for every required icon', () => {
     for (const name of [
-      'sun', 'moon', 'minus', 'square', 'copy', 'x', 'download-simple', 'folder-open',
+      'sun', 'moon', 'minus', 'plus', 'crosshair', 'square', 'copy', 'x', 'download-simple', 'folder-open',
       'flip-horizontal', 'play', 'pause', 'stop', 'house', 'plug', 'check-circle', 'warning',
       'cube', 'upload-simple', 'eye', 'eye-slash', 'caret-right', 'sliders-horizontal',
       'arrow-right', 'terminal-window', 'link',
