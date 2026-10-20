@@ -1,12 +1,8 @@
 import { DestroyRef, Service, inject, signal } from '@angular/core';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { isTauri } from './tauri';
 
 type UnlistenFn = () => void;
-
-/** True when running inside the Tauri webview (false for plain `ng serve`). */
-function isTauri(): boolean {
-  return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
-}
 
 /**
  * Thin wrapper around the Tauri window for the custom title bar. It exposes

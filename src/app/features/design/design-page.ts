@@ -3,18 +3,20 @@ import { EmptyNote } from '../../shell/empty-note';
 import { ViewportPlaceholder } from '../../shell/viewport-placeholder';
 import { WorkspaceLayout } from '../../shell/workspace-layout';
 import { PanelSection } from '../../ui/panel/panel-section';
+import { LayerList } from './layer-list';
+import { ProjectSection } from './project-section';
 
-/** Design workspace: load a Gerber, place it on the peg board, preview G-code. Placeholder content. */
+/** Design workspace: load a Gerber, place it on the peg board, preview G-code. Project and Layers are live; the rest is placeholder content. */
 @Component({
   selector: 'app-design-page',
-  imports: [WorkspaceLayout, PanelSection, EmptyNote, ViewportPlaceholder],
+  imports: [WorkspaceLayout, PanelSection, EmptyNote, ViewportPlaceholder, ProjectSection, LayerList],
   template: `
     <app-workspace-layout leftLabel="Project and placement settings" rightLabel="Placement readout and G-code">
       <app-panel-section left heading="Project">
-        <app-empty-note>No Gerber loaded. Open a Gerber to see the board.</app-empty-note>
+        <app-project-section />
       </app-panel-section>
       <app-panel-section left heading="Layers">
-        <app-empty-note>Layers appear once a Gerber is loaded.</app-empty-note>
+        <app-layer-list />
       </app-panel-section>
       <app-panel-section left heading="Placement">
         <app-empty-note>Offset, side and mirror are set once a board is loaded.</app-empty-note>
