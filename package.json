@@ -4,6 +4,7 @@
   "scripts": {
     "ng": "ng",
     "tauri": "tauri",
+    "tauri:dev": "GDK_BACKEND=x11 GDK_SCALE=1 COPPERLINE_ZOOM=1.25 tauri dev",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
