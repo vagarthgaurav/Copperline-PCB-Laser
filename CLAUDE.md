@@ -57,3 +57,11 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Use the `providedIn: 'root'` option for singleton services
 - Prefer the `@Service` decorator over `@Injectable({providedIn: 'root'})` for new singleton services (Angular v22+)
 - Use the `inject()` function instead of constructor injection
+
+## Product and UI
+
+PCB Laser (Copperline) is a Tauri 2 + Angular desktop app for a laser machine that engraves photo-resist on copper-clad PCBs. The user loads a Gerber, sees it as a 3D board on a peg-board floor, drags it into position, flips it for the second side, simulates the job and exports G-code or streams it to the machine over serial.
+
+- The look is defined by the design system in `design-system/`. Read `design-system/README.md` first, then the card for each component you build (`design-system/components/<Name>/README.md`). Styles come from the CSS custom properties in `src/styles/tokens.css`; never copy hex values. Regenerate tokens with `npm run tokens`.
+- The screens are mocked up in `design-system/mockups/` (open the HTML files in a browser). Read `design-system/mockups/README.md` before building or changing any screen or the custom window title bar. It has the layout, the Tauri window setup and a suggested build order.
+- Light and dark themes are required; accessibility target is WCAG AA with axe clean.

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Window chrome</title>
+<link rel="stylesheet" href="copperline.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>body{margin:0}</style>
+<meta name="viewport" content="width=1520">
+</head>
+<body>
+
+<div data-theme="light" style="width:1520px;height:980px;padding:44px 60px;display:flex;flex-direction:column;gap:24px;background:var(--surface-100);color:var(--ink);font-family:var(--font-sans);font-size:14px;line-height:20px">
+
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+    <div>
+      <h1 style="margin:0;font-family:var(--font-display);font-size:28px;line-height:34px;font-weight:600;letter-spacing:-0.01em">Window chrome</h1>
+      <p class="muted" style="margin:4px 0 0">Custom title bar for the Tauri window · 48 px tall · every empty area drags the window</p>
+    </div>
+    <p class="code muted" style="margin:0">controls 38 × 36 px · radius 10 px · 2 px gap</p>
+  </div>
+
+  <!-- Light -->
+  <section data-theme="light" style="background:var(--stage);border-radius:16px;padding:20px 28px 0;overflow:hidden">
+    <p class="label" style="margin:0 0 12px;color:var(--ink-muted)">Light</p>
+    <div style="border:1px solid var(--win-edge);border-bottom:0;border-radius:14px 14px 0 0;overflow:hidden;box-shadow:var(--win-shadow)">
+      <header class="titlebar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h5l4 4h5"/><path d="M5 17h9"/><circle cx="5" cy="7" r="1.4" fill="currentColor" stroke="none"/><circle cx="19" cy="11" r="1.4" fill="currentColor" stroke="none"/><circle cx="5" cy="17" r="1.4" fill="currentColor" stroke="none"/><circle cx="14" cy="17" r="1.4" fill="currentColor" stroke="none"/></svg></span>
+          <p class="brand-name">Copperline</p>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Workspace, light">
+          <button class="tab" type="button" role="tab" aria-selected="true"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M223.68,66.15,135.68,18h0a15.88,15.88,0,0,0-15.36,0l-88,48.17a16,16,0,0,0-8.32,14v95.64a16,16,0,0,0,8.32,14l88,48.17a15.88,15.88,0,0,0,15.36,0l88-48.17a16,16,0,0,0,8.32-14V80.18A16,16,0,0,0,223.68,66.15ZM128,32h0l80.34,44L128,120,47.66,76ZM40,90l80,43.78v85.79L40,175.82Zm96,129.57V133.82L216,90v85.78Z"/></svg>Design</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" tabindex="-1"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M232.4,114.49,88.32,26.35a16,16,0,0,0-16.2-.3A15.86,15.86,0,0,0,64,39.87V216.13A15.94,15.94,0,0,0,80,232a16.07,16.07,0,0,0,8.36-2.35L232.4,141.51a15.81,15.81,0,0,0,0-27ZM80,215.94V40l143.83,88Z"/></svg>Simulate</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" tabindex="-1"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M237.66,18.34a8,8,0,0,0-11.32,0l-52.4,52.41-5.37-5.38a32.05,32.05,0,0,0-45.26,0L100,88.69l-6.34-6.35A8,8,0,0,0,82.34,93.66L88.69,100,65.37,123.31a32,32,0,0,0,0,45.26l5.38,5.37-52.41,52.4a8,8,0,0,0,11.32,11.32l52.4-52.41,5.37,5.38a32,32,0,0,0,45.26,0L156,167.31l6.34,6.35a8,8,0,0,0,11.32-11.32L167.31,156l23.32-23.31a32,32,0,0,0,0-45.26l-5.38-5.37,52.41-52.4A8,8,0,0,0,237.66,18.34Zm-116.29,161a16,16,0,0,1-22.62,0L76.69,157.25a16,16,0,0,1,0-22.62L100,111.31,144.69,156Zm57.94-57.94L156,144.69,111.31,100l23.32-23.31a16,16,0,0,1,22.62,0l22.06,22A16,16,0,0,1,179.31,121.37Z"/></svg>Machine</button>
+        </div>
+        <div class="drag">
+          <span class="filechip"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M245,110.64A16,16,0,0,0,232,104H216V88a16,16,0,0,0-16-16H130.67L102.94,51.2a16.14,16.14,0,0,0-9.6-3.2H40A16,16,0,0,0,24,64V208h0a8,8,0,0,0,8,8H211.1a8,8,0,0,0,7.59-5.47l28.49-85.47A16.05,16.05,0,0,0,245,110.64ZM93.34,64,123.2,86.4A8,8,0,0,0,128,88h72v16H69.77a16,16,0,0,0-15.18,10.94L40,158.7V64Zm112,136H43.1l26.67-80H232Z"/></svg><b>board_v3.zip</b> · Top side</span>
+        </div>
+        <div class="tb-right">
+          <span class="chip" role="status"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M165.66,101.66,139.31,128l26.35,26.34a8,8,0,0,1-11.32,11.32L128,139.31l-26.34,26.35a8,8,0,0,1-11.32-11.32L116.69,128,90.34,101.66a8,8,0,0,1,11.32-11.32L128,116.69l26.34-26.35a8,8,0,0,1,11.32,11.32ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg>Disconnected</span>
+          <button class="btn icon outline" type="button" aria-label="Switch to dark theme"><svg class="ic" width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z"/></svg></button>
+          <button class="btn primary" type="button"><svg class="ic" width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></svg>Export G-code</button>
+          <span class="sep" aria-hidden="true"></span>
+          <div class="wc" role="group" aria-label="Window controls, light">
+            <button class="wbtn" type="button" aria-label="Minimize"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128Z"/></svg></button>
+            <button class="wbtn" type="button" aria-label="Maximize"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32Zm0,176H48V48H208V208Z"/></svg></button>
+            <button class="wbtn close" type="button" aria-label="Close"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button>
+          </div>
+        </div>
+      </header>
+      <div style="height:28px;background:var(--surface-100)"></div>
+    </div>
+  </section>
+
+  <!-- Dark -->
+  <section data-theme="dark" style="background:var(--stage);border-radius:16px;padding:20px 28px 0;overflow:hidden;color:var(--ink)">
+    <p class="label" style="margin:0 0 12px">Dark</p>
+    <div style="border:1px solid var(--win-edge);border-bottom:0;border-radius:14px 14px 0 0;overflow:hidden;box-shadow:var(--win-shadow)">
+      <header class="titlebar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h5l4 4h5"/><path d="M5 17h9"/><circle cx="5" cy="7" r="1.4" fill="currentColor" stroke="none"/><circle cx="19" cy="11" r="1.4" fill="currentColor" stroke="none"/><circle cx="5" cy="17" r="1.4" fill="currentColor" stroke="none"/><circle cx="14" cy="17" r="1.4" fill="currentColor" stroke="none"/></svg></span>
+          <p class="brand-name">Copperline</p>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Workspace, dark">
+          <button class="tab" type="button" role="tab" aria-selected="false" tabindex="-1"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M223.68,66.15,135.68,18h0a15.88,15.88,0,0,0-15.36,0l-88,48.17a16,16,0,0,0-8.32,14v95.64a16,16,0,0,0,8.32,14l88,48.17a15.88,15.88,0,0,0,15.36,0l88-48.17a16,16,0,0,0,8.32-14V80.18A16,16,0,0,0,223.68,66.15ZM128,32h0l80.34,44L128,120,47.66,76ZM40,90l80,43.78v85.79L40,175.82Zm96,129.57V133.82L216,90v85.78Z"/></svg>Design</button>
+          <button class="tab" type="button" role="tab" aria-selected="true"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M232.4,114.49,88.32,26.35a16,16,0,0,0-16.2-.3A15.86,15.86,0,0,0,64,39.87V216.13A15.94,15.94,0,0,0,80,232a16.07,16.07,0,0,0,8.36-2.35L232.4,141.51a15.81,15.81,0,0,0,0-27ZM80,215.94V40l143.83,88Z"/></svg>Simulate</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" tabindex="-1"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M237.66,18.34a8,8,0,0,0-11.32,0l-52.4,52.41-5.37-5.38a32.05,32.05,0,0,0-45.26,0L100,88.69l-6.34-6.35A8,8,0,0,0,82.34,93.66L88.69,100,65.37,123.31a32,32,0,0,0,0,45.26l5.38,5.37-52.41,52.4a8,8,0,0,0,11.32,11.32l52.4-52.41,5.37,5.38a32,32,0,0,0,45.26,0L156,167.31l6.34,6.35a8,8,0,0,0,11.32-11.32L167.31,156l23.32-23.31a32,32,0,0,0,0-45.26l-5.38-5.37,52.41-52.4A8,8,0,0,0,237.66,18.34Zm-116.29,161a16,16,0,0,1-22.62,0L76.69,157.25a16,16,0,0,1,0-22.62L100,111.31,144.69,156Zm57.94-57.94L156,144.69,111.31,100l23.32-23.31a16,16,0,0,1,22.62,0l22.06,22A16,16,0,0,1,179.31,121.37Z"/></svg>Machine</button>
+        </div>
+        <div class="drag">
+          <span class="filechip"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M245,110.64A16,16,0,0,0,232,104H216V88a16,16,0,0,0-16-16H130.67L102.94,51.2a16.14,16.14,0,0,0-9.6-3.2H40A16,16,0,0,0,24,64V208h0a8,8,0,0,0,8,8H211.1a8,8,0,0,0,7.59-5.47l28.49-85.47A16.05,16.05,0,0,0,245,110.64ZM93.34,64,123.2,86.4A8,8,0,0,0,128,88h72v16H69.77a16,16,0,0,0-15.18,10.94L40,158.7V64Zm112,136H43.1l26.67-80H232Z"/></svg><b>board_v3.zip</b> · Top side</span>
+        </div>
+        <div class="tb-right">
+          <span class="chip accent" role="status"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M232.4,114.49,88.32,26.35a16,16,0,0,0-16.2-.3A15.86,15.86,0,0,0,64,39.87V216.13A15.94,15.94,0,0,0,80,232a16.07,16.07,0,0,0,8.36-2.35L232.4,141.51a15.81,15.81,0,0,0,0-27ZM80,215.94V40l143.83,88Z"/></svg>Simulating</span>
+          <button class="btn icon outline" type="button" aria-label="Switch to light theme"><svg class="ic" width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z"/></svg></button>
+          <button class="btn primary" type="button"><svg class="ic" width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></svg>Export G-code</button>
+          <span class="sep" aria-hidden="true"></span>
+          <div class="wc" role="group" aria-label="Window controls, dark">
+            <button class="wbtn" type="button" aria-label="Minimize"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128Z"/></svg></button>
+            <button class="wbtn" type="button" aria-label="Maximize"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32Zm0,176H48V48H208V208Z"/></svg></button>
+            <button class="wbtn close" type="button" aria-label="Close"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button>
+          </div>
+        </div>
+      </header>
+      <div style="height:28px;background:var(--surface-100)"></div>
+    </div>
+  </section>
+
+  <!-- States -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;flex:1;min-height:0">
+
+    <section style="background:var(--surface-200);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;display:flex;flex-direction:column;gap:16px">
+      <h2 class="heading">Control states</h2>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px"><button class="wbtn" type="button" aria-label="Minimize, default"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128Z"/></svg></button><span class="small muted">Default</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px"><button class="wbtn is-hover" type="button" aria-label="Minimize, hover"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128Z"/></svg></button><span class="small muted">Hover</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px"><button class="wbtn is-press" type="button" aria-label="Minimize, pressed"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128Z"/></svg></button><span class="small muted">Pressed</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px"><button class="wbtn is-focus" type="button" aria-label="Minimize, keyboard focus"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128Z"/></svg></button><span class="small muted">Focus</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px"><button class="wbtn close is-hover" type="button" aria-label="Close, hover"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button><span class="small muted">Close hover</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px"><button class="wbtn close is-press" type="button" aria-label="Close, pressed"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button><span class="small muted">Close pressed</span></div>
+      </div>
+      <p class="small muted" style="margin:0">Close turns danger-soft on hover and solid danger on press, so it never reads as the copper accent. Every state also changes shape or fill, not hue alone.</p>
+    </section>
+
+    <section style="background:var(--surface-200);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;display:flex;flex-direction:column;gap:12px">
+      <h2 class="heading">Window states</h2>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden"><header class="titlebar" style="gap:8px;padding-left:10px"><span class="brand-mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h5l4 4h5"/><path d="M5 17h9"/></svg></span><span style="flex:1"></span><div class="wc"><button class="wbtn" type="button" aria-label="Minimize"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128Z"/></svg></button><button class="wbtn" type="button" aria-label="Maximize"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32Zm0,176H48V48H208V208Z"/></svg></button><button class="wbtn close" type="button" aria-label="Close"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button></div></header></div>
+          <span class="small muted">Focused</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden"><header class="titlebar inactive" style="gap:8px;padding-left:10px"><span class="brand-mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h5l4 4h5"/><path d="M5 17h9"/></svg></span><span style="flex:1"></span><div class="wc"><button class="wbtn" type="button" aria-label="Minimize"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false" style="opacity:.6"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128Z"/></svg></button><button class="wbtn" type="button" aria-label="Maximize"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false" style="opacity:.6"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32Zm0,176H48V48H208V208Z"/></svg></button><button class="wbtn close" type="button" aria-label="Close"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false" style="opacity:.6"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button></div></header></div>
+          <span class="small muted">Inactive window</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="border:1px solid var(--border);border-radius:0;overflow:hidden"><header class="titlebar" style="gap:8px;padding-left:10px"><span class="brand-mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h5l4 4h5"/><path d="M5 17h9"/></svg></span><span style="flex:1"></span><div class="wc"><button class="wbtn" type="button" aria-label="Minimize"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128Z"/></svg></button><button class="wbtn" type="button" aria-label="Restore"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z"/></svg></button><button class="wbtn close" type="button" aria-label="Close"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button></div></header></div>
+          <span class="small muted">Maximized · square corners, restore icon</span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+</body>
+</html>

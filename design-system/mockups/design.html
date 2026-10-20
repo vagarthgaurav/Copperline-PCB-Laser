@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Design workspace</title>
+<link rel="stylesheet" href="copperline.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>body{margin:0}</style>
+<meta name="viewport" content="width=1520">
+</head>
+<body>
+
+<div class="stage" data-theme="light">
+<div class="window">
+
+  <!-- Title bar: replaces the OS frame (Tauri decorations: false). Empty areas are the drag region. -->
+  <header class="titlebar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h5l4 4h5"/><path d="M5 17h9"/><circle cx="5" cy="7" r="1.4" fill="currentColor" stroke="none"/><circle cx="19" cy="11" r="1.4" fill="currentColor" stroke="none"/><circle cx="5" cy="17" r="1.4" fill="currentColor" stroke="none"/><circle cx="14" cy="17" r="1.4" fill="currentColor" stroke="none"/></svg></span>
+      <p class="brand-name">Copperline</p>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Workspace">
+      <button class="tab" type="button" role="tab" aria-selected="true"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M223.68,66.15,135.68,18h0a15.88,15.88,0,0,0-15.36,0l-88,48.17a16,16,0,0,0-8.32,14v95.64a16,16,0,0,0,8.32,14l88,48.17a15.88,15.88,0,0,0,15.36,0l88-48.17a16,16,0,0,0,8.32-14V80.18A16,16,0,0,0,223.68,66.15ZM128,32h0l80.34,44L128,120,47.66,76ZM40,90l80,43.78v85.79L40,175.82Zm96,129.57V133.82L216,90v85.78Z"/></svg>Design</button>
+      <a class="tab" role="tab" aria-selected="false" tabindex="-1" href="simulate.html" style="text-decoration:none"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M232.4,114.49,88.32,26.35a16,16,0,0,0-16.2-.3A15.86,15.86,0,0,0,64,39.87V216.13A15.94,15.94,0,0,0,80,232a16.07,16.07,0,0,0,8.36-2.35L232.4,141.51a15.81,15.81,0,0,0,0-27ZM80,215.94V40l143.83,88Z"/></svg>Simulate</a>
+      <a class="tab" role="tab" aria-selected="false" tabindex="-1" href="machine.html" style="text-decoration:none"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M237.66,18.34a8,8,0,0,0-11.32,0l-52.4,52.41-5.37-5.38a32.05,32.05,0,0,0-45.26,0L100,88.69l-6.34-6.35A8,8,0,0,0,82.34,93.66L88.69,100,65.37,123.31a32,32,0,0,0,0,45.26l5.38,5.37-52.41,52.4a8,8,0,0,0,11.32,11.32l52.4-52.41,5.37,5.38a32,32,0,0,0,45.26,0L156,167.31l6.34,6.35a8,8,0,0,0,11.32-11.32L167.31,156l23.32-23.31a32,32,0,0,0,0-45.26l-5.38-5.37,52.41-52.4A8,8,0,0,0,237.66,18.34Zm-116.29,161a16,16,0,0,1-22.62,0L76.69,157.25a16,16,0,0,1,0-22.62L100,111.31,144.69,156Zm57.94-57.94L156,144.69,111.31,100l23.32-23.31a16,16,0,0,1,22.62,0l22.06,22A16,16,0,0,1,179.31,121.37Z"/></svg>Machine</a>
+    </div>
+    <div class="drag">
+      <span class="filechip"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M245,110.64A16,16,0,0,0,232,104H216V88a16,16,0,0,0-16-16H130.67L102.94,51.2a16.14,16.14,0,0,0-9.6-3.2H40A16,16,0,0,0,24,64V208h0a8,8,0,0,0,8,8H211.1a8,8,0,0,0,7.59-5.47l28.49-85.47A16.05,16.05,0,0,0,245,110.64ZM93.34,64,123.2,86.4A8,8,0,0,0,128,88h72v16H69.77a16,16,0,0,0-15.18,10.94L40,158.7V64Zm112,136H43.1l26.67-80H232Z"/></svg><b>board_v3.zip</b> · Top side</span>
+    </div>
+    <div class="tb-right">
+      <span class="chip" role="status"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M165.66,101.66,139.31,128l26.35,26.34a8,8,0,0,1-11.32,11.32L128,139.31l-26.34,26.35a8,8,0,0,1-11.32-11.32L116.69,128,90.34,101.66a8,8,0,0,1,11.32-11.32L128,116.69l26.34-26.35a8,8,0,0,1,11.32,11.32ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg>Disconnected</span>
+      <button class="btn icon outline" type="button" aria-label="Switch to dark theme"><svg class="ic" width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z"/></svg></button>
+      <button class="btn primary" type="button"><svg class="ic" width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></svg>Export G-code</button>
+      <span class="sep" aria-hidden="true"></span>
+      <div class="wc" role="group" aria-label="Window controls">
+        <button class="wbtn" type="button" aria-label="Minimize"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128Z"/></svg></button>
+        <button class="wbtn" type="button" aria-label="Maximize"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32Zm0,176H48V48H208V208Z"/></svg></button>
+        <button class="wbtn close" type="button" aria-label="Close"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button>
+      </div>
+    </div>
+  </header>
+
+  <div class="body">
+
+    <!-- Left: project, layers, placement, engraving -->
+    <aside class="panel" aria-label="Project and placement settings">
+      <section class="sec">
+        <h2 class="heading">Project</h2>
+        <div class="filecard">
+          <span class="ficon" aria-hidden="true"><svg class="ic" width="20" height="20" viewBox="0 0 256 256" fill="currentColor" focusable="false"><path d="M223.68,66.15,135.68,18h0a15.88,15.88,0,0,0-15.36,0l-88,48.17a16,16,0,0,0-8.32,14v95.64a16,16,0,0,0,8.32,14l88,48.17a15.88,15.88,0,0,0,15.36,0l88-48.17a16,16,0,0,0,8.32-14V80.18A16,16,0,0,0,223.68,66.15ZM128,32h0l80.34,44L128,120,47.66,76ZM40,90l80,43.78v85.79L40,175.82Zm96,129.57V133.82L216,90v85.78Z"/></svg></span>
+          <div><div class="nm">board_v3.zip</div><div class="small muted">4 files · 80 × 55 mm</div></div>
+        </div>
+        <button class="btn secondary block" type="button"><svg class="ic" width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M245,110.64A16,16,0,0,0,232,104H216V88a16,16,0,0,0-16-16H130.67L102.94,51.2a16.14,16.14,0,0,0-9.6-3.2H40A16,16,0,0,0,24,64V208h0a8,8,0,0,0,8,8H211.1a8,8,0,0,0,7.59-5.47l28.49-85.47A16.05,16.05,0,0,0,245,110.64ZM93.34,64,123.2,86.4A8,8,0,0,0,128,88h72v16H69.77a16,16,0,0,0-15.18,10.94L40,158.7V64Zm112,136H43.1l26.67-80H232Z"/></svg>Open Gerber…</button>
+      </section>
+
+      <section class="sec">
+        <h2 class="heading" id="layers-h">Layers</h2>
+        <ul class="layers" aria-labelledby="layers-h">
+          <li><button class="layer" type="button" aria-current="true"><span class="swatch cu" aria-hidden="true"></span>Top copper<span class="file">F_Cu</span></button></li>
+          <li><button class="layer" type="button"><span class="swatch cu" aria-hidden="true"></span>Bottom copper<span class="file">B_Cu</span></button></li>
+          <li><button class="layer" type="button"><span class="swatch outline" aria-hidden="true"></span>Outline<span class="file">Edge_Cuts</span></button></li>
+          <li><button class="layer" type="button"><span class="swatch drill" aria-hidden="true"></span>Drill<span class="file">.drl</span></button></li>
+        </ul>
+      </section>
+
+      <section class="sec">
+        <h2 class="heading">Placement</h2>
+        <div class="row2">
+          <div class="field"><label class="label" for="ox">Offset X</label><div class="input"><input id="ox" type="text" inputmode="decimal" value="12.50" readonly><span class="unit" aria-hidden="true">mm</span></div></div>
+          <div class="field"><label class="label" for="oy">Offset Y</label><div class="input"><input id="oy" type="text" inputmode="decimal" value="6.00" readonly><span class="unit" aria-hidden="true">mm</span></div></div>
+        </div>
+        <div class="field">
+          <span class="label" id="side-l">Side</span>
+          <div class="seg block" role="radiogroup" aria-labelledby="side-l">
+            <button type="button" role="radio" aria-checked="true">Top</button>
+            <button type="button" role="radio" aria-checked="false" tabindex="-1">Bottom</button>
+          </div>
+        </div>
+        <div class="switch-row"><button class="switch" type="button" role="switch" aria-checked="false" aria-labelledby="mir"></button><span id="mir">Mirror for bottom side</span></div>
+      </section>
+
+      <section class="sec">
+        <h2 class="heading">Engraving</h2>
+        <div class="field">
+          <div class="fieldrow"><label class="label" for="pw">Laser power</label><output class="code" for="pw">65%</output></div>
+          <div class="range"><span class="track"></span><span class="fill" style="width:65%"></span><span class="thumb" style="left:65%"></span><input id="pw" type="range" min="0" max="100" value="65" aria-valuetext="65 percent" readonly></div>
+        </div>
+        <div class="field"><label class="label" for="fd">Feed rate</label><div class="input"><input id="fd" type="text" inputmode="numeric" value="1200" readonly><span class="unit" aria-hidden="true">mm/min</span></div></div>
+      </section>
+    </aside>
+
+    <!-- Center: 3D viewport -->
+    <main class="center" aria-label="3D viewport">
+      <div class="viewport" tabindex="0">
+        <svg class="scene" viewBox="0 0 720 560" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Peg board seen from above at an angle. A green circuit board is pegged against two alignment pegs, offset 12.5 millimetres in X and 6 in Y from the origin peg. Nothing is engraved yet.">
+          <defs><pattern id="holes" x="10" y="10" width="40" height="40" patternUnits="userSpaceOnUse"><circle class="hole" cx="20" cy="20" r="4"/></pattern></defs>
+          <g transform="translate(0 90)">
+            <polygon class="floor" points="620.4,210 395.3,340 395.3,350 620.4,220"/>
+            <polygon class="floor" points="100.8,170 395.3,340 395.3,350 100.8,180"/>
+            <polygon class="floor" points="326,40 620.4,210 395.3,340 100.8,170"/>
+            <g transform="translate(326 40) matrix(0.866 0.5 -0.866 0.5 0 0)"><rect x="10" y="10" width="320" height="240" fill="url(#holes)"/></g>
+            <polygon class="board" points="492.3,184 397,239 397,245 492.3,190"/>
+            <polygon class="board" points="249.8,154 397,239 397,245 249.8,160"/>
+            <g transform="translate(0 -6)"><g transform="translate(326 40) matrix(0.866 0.5 -0.866 0.5 0 0)">
+              <rect class="board" x="76" y="54" width="170" height="110"/>
+              <g transform="translate(76 54)">
+                <path class="copper" d="M20 20 H85 V55 H120"/><path class="copper" d="M20 90 H85"/><path class="copper" d="M120 55 H150 V30"/><path class="copper" d="M85 90 H120 V55"/>
+                <circle class="pad" cx="20" cy="20" r="5.5"/><circle class="pad" cx="20" cy="90" r="5.5"/><circle class="pad" cx="85" cy="90" r="5.5"/><circle class="pad" cx="120" cy="55" r="5.5"/><circle class="pad" cx="150" cy="30" r="5.5"/><circle class="pad" cx="150" cy="80" r="5.5"/>
+              </g>
+              <rect class="sel" x="72" y="50" width="178" height="118"/>
+              <rect class="handle" x="68" y="46" width="8" height="8"/><rect class="handle" x="246" y="46" width="8" height="8"/><rect class="handle" x="68" y="164" width="8" height="8"/><rect class="handle" x="246" y="164" width="8" height="8"/>
+            </g></g>
+            <g class="peg"><ellipse cx="326" cy="110" rx="6" ry="3.4"/><rect x="320" y="86" width="12" height="24"/><ellipse class="top" cx="326" cy="86" rx="6" ry="3.4"/></g>
+            <g class="peg"><ellipse cx="256.7" cy="150" rx="6" ry="3.4"/><rect x="250.7" y="126" width="12" height="24"/><ellipse class="top" cx="256.7" cy="126" rx="6" ry="3.4"/></g>
+            <text class="lbl" x="312" y="84" text-anchor="end">Origin peg</text>
+          </g>
+        </svg>
+
+        <div class="ov tl seg" role="radiogroup" aria-label="Board side" style="padding:2px">
+          <button type="button" role="radio" aria-checked="true">Top</button>
+          <button type="button" role="radio" aria-checked="false" tabindex="-1">Bottom</button>
+        </div>
+        <div class="ov tc pad small"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false" style="color:var(--mask)"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></svg>Board fits the peg grid · drag to move, arrow keys nudge 1 mm</div>
+        <div class="ov tr tools" role="group" aria-label="Board tools">
+          <button class="tool" type="button" aria-label="Move board" aria-pressed="true"><svg class="ic" width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M96,136H64v24a8,8,0,0,1-13.66,5.66l-32-32a8,8,0,0,1,0-11.32l32-32A8,8,0,0,1,64,96v24H96a8,8,0,0,1,0,16Zm0-72h24V96a8,8,0,0,0,16,0V64h24a8,8,0,0,0,5.66-13.66l-32-32a8,8,0,0,0-11.32,0l-32,32A8,8,0,0,0,96,64Zm141.66,58.34-32-32A8,8,0,0,0,192,96v24H160a8,8,0,0,0,0,16h32v24a8,8,0,0,0,13.66,5.66l32-32A8,8,0,0,0,237.66,122.34ZM160,192H136V160a8,8,0,0,0-16,0v32H96a8,8,0,0,0-5.66,13.66l32,32a8,8,0,0,0,11.32,0l32-32A8,8,0,0,0,160,192Z"/></svg></button>
+          <button class="tool" type="button" aria-label="Rotate 90 degrees" aria-pressed="false"><svg class="ic" width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M240,56v48a8,8,0,0,1-8,8H184a8,8,0,0,1,0-16H211.4L184.81,71.64l-.25-.24a80,80,0,1,0-1.67,114.78,8,8,0,0,1,11,11.63A95.44,95.44,0,0,1,128,224h-1.32A96,96,0,1,1,195.75,60L224,85.8V56a8,8,0,1,1,16,0Z"/></svg></button>
+          <button class="tool" type="button" aria-label="Flip board" aria-pressed="false"><svg class="ic" width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M107.18,24.33a15.86,15.86,0,0,0-17.92,9.45l-.06.14-64,159.93A16,16,0,0,0,40,216h64a16,16,0,0,0,16-16V40A15.85,15.85,0,0,0,107.18,24.33ZM104,200H40l.06-.15L104,40Zm126.77-6.15-64-159.93-.06-.14A16,16,0,0,0,136,40V200a16,16,0,0,0,16,16h64a16,16,0,0,0,14.78-22.15ZM152,200V40l63.93,159.84.06.15Z"/></svg></button>
+        </div>
+        <div class="ov bl pad"><span class="label">Offset</span><span class="code">X 12.50 Y 6.00 mm</span></div>
+        <ul class="ov br legend small" aria-label="Legend">
+          <li><span class="sw" style="background:var(--scene-board)"></span>Board</li>
+          <li><span class="sw" style="background:var(--scene-copper)"></span>Copper</li>
+          <li><span class="sw" style="background:var(--scene-done)"></span>Engraved</li>
+          <li><span class="sw" style="background:var(--scene-laser)"></span>Laser</li>
+        </ul>
+      </div>
+    </main>
+
+    <!-- Right: placement readout + live G-code -->
+    <aside class="panel" aria-label="Placement readout and G-code">
+      <section class="sec">
+        <h2 class="heading">Placement</h2>
+        <dl class="tiles" style="margin:0">
+          <div class="tile"><dt class="label">Offset X</dt><dd class="readout">012.50</dd></div>
+          <div class="tile"><dt class="label">Offset Y</dt><dd class="readout">006.00</dd></div>
+        </dl>
+        <p class="small muted" style="margin:0">Offset is added to every move in the exported G-code.</p>
+      </section>
+
+      <section class="gcode" aria-label="G-code preview">
+        <div class="gcode-h"><h2 class="heading">G-code</h2><span class="small muted">1,284 lines</span></div>
+        <ol tabindex="0" aria-label="G-code lines">
+          <li class="gl"><span class="n">1</span><span class="car"></span><span class="s"><b class="g">G21</b> <span class="c">; units: millimetres</span></span></li>
+          <li class="gl"><span class="n">2</span><span class="car"></span><span class="s"><b class="g">G90</b> <span class="c">; absolute moves</span></span></li>
+          <li class="gl"><span class="n">3</span><span class="car"></span><span class="s"><b class="g">M5</b> <span class="c">; laser off</span></span></li>
+          <li class="gl"><span class="n">4</span><span class="car"></span><span class="s"><span class="c">; top copper · offset X12.50 Y6.00</span></span></li>
+          <li class="gl"><span class="n">5</span><span class="car"></span><span class="s"><b class="g">G0</b> X32.500 Y26.000</span></li>
+          <li class="gl"><span class="n">6</span><span class="car"></span><span class="s"><b class="g">M3</b> S650 <span class="c">; 65 %</span></span></li>
+          <li class="gl"><span class="n">7</span><span class="car"></span><span class="s"><b class="g">G1</b> X97.500 Y26.000 F1200</span></li>
+          <li class="gl"><span class="n">8</span><span class="car"></span><span class="s"><b class="g">G1</b> X97.500 Y61.000</span></li>
+          <li class="gl"><span class="n">9</span><span class="car"></span><span class="s"><b class="g">G1</b> X132.500 Y61.000</span></li>
+          <li class="gl"><span class="n">10</span><span class="car"></span><span class="s"><b class="g">M5</b></span></li>
+          <li class="gl"><span class="n">11</span><span class="car"></span><span class="s"><b class="g">G0</b> X32.500 Y96.000</span></li>
+          <li class="gl"><span class="n">12</span><span class="car"></span><span class="s"><b class="g">M3</b> S650</span></li>
+          <li class="gl"><span class="n">13</span><span class="car"></span><span class="s"><b class="g">G1</b> X97.500 Y96.000 F1200</span></li>
+          <li class="gl"><span class="n">14</span><span class="car"></span><span class="s"><b class="g">M5</b></span></li>
+          <li class="gl"><span class="n">15</span><span class="car"></span><span class="s"><b class="g">G0</b> X132.500 Y61.000</span></li>
+          <li class="gl"><span class="n">16</span><span class="car"></span><span class="s"><b class="g">M3</b> S650</span></li>
+          <li class="gl"><span class="n">17</span><span class="car"></span><span class="s"><b class="g">G1</b> X162.500 Y61.000 F1200</span></li>
+          <li class="gl"><span class="n">18</span><span class="car"></span><span class="s"><b class="g">G1</b> X162.500 Y36.000</span></li>
+          <li class="gl"><span class="n">19</span><span class="car"></span><span class="s"><b class="g">M5</b></span></li>
+          <li class="gl"><span class="n">20</span><span class="car"></span><span class="s"><b class="g">G0</b> X97.500 Y96.000</span></li>
+          <li class="gl"><span class="n">21</span><span class="car"></span><span class="s"><b class="g">M3</b> S650</span></li>
+          <li class="gl"><span class="n">22</span><span class="car"></span><span class="s"><b class="g">G1</b> X132.500 Y96.000 F1200</span></li>
+          <li class="gl"><span class="n">23</span><span class="car"></span><span class="s"><b class="g">G1</b> X132.500 Y61.000</span></li>
+          <li class="gl"><span class="n">24</span><span class="car"></span><span class="s"><b class="g">M5</b></span></li>
+        </ol>
+        <div class="gcode-f"><span class="small muted">Ready to export</span><span style="flex:1"></span><button class="btn sm outline" type="button"><svg class="ic" width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></svg>Export</button></div>
+      </section>
+    </aside>
+
+  </div>
+</div>
+</div>
+</body>
+</html>
