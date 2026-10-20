@@ -1,5 +1,5 @@
 // Generates src/styles/tokens.css from design-system/tokens.json.
-// Run with `npm run tokens` after editing the tokens.
+// Run with `pnpm tokens` after editing the tokens.
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const tokens = JSON.parse(readFileSync('design-system/tokens.json', 'utf8'));

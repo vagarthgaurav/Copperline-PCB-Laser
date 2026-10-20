@@ -11,7 +11,7 @@
     "tokens": "node scripts/build-tokens.mjs"
   },
   "private": true,
-  "packageManager": "npm@11.20.0",
+  "packageManager": "pnpm@11.25.0",
   "dependencies": {
     "@angular/common": "^22.2.0",
     "@angular/compiler": "^22.2.0",

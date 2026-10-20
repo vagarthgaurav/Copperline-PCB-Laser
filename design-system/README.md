@@ -40,6 +40,6 @@ Icons the app uses: `play`, `pause`, `skip-back`, `skip-forward`, `arrow-counter
 
 ## In this repo
 
-- `design-system/tokens.json` is the single source for colour, type, spacing, radius and shadow. Edit it, then run `npm run tokens` to regenerate `src/styles/tokens.css` (loaded globally from `angular.json`). Never edit `tokens.css` by hand.
+- `design-system/tokens.json` is the single source for colour, type, spacing, radius and shadow. Edit it, then run `pnpm tokens` to regenerate `src/styles/tokens.css` (loaded globally from `angular.json`). Never edit `tokens.css` by hand.
 - `design-system/components/<Name>/preview.html` are static, framework-free references for how each component looks in every state, with its guidelines in the `README.md` beside it. Open one in a browser after temporarily adding `<link rel="stylesheet" href="../../../src/styles/tokens.css">`, or build the real Angular component and match it.
 - Fonts are not bundled yet. Install `@fontsource-variable/bricolage-grotesque`, `@fontsource-variable/instrument-sans` and `@fontsource-variable/jetbrains-mono` before the first release so the Tauri app works offline.

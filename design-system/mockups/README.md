@@ -14,7 +14,7 @@ Treat the mockups as a reference, not code to copy. Rebuild them as Angular comp
 
 ## Rules
 
-1. **Tokens only.** Colours, type, spacing and radii come from `src/styles/tokens.css` (generated from `design-system/tokens.json` by `npm run tokens`). Do not copy hex values out of `copperline.css`. Its `--stage`, `--win-edge` and `--win-shadow` variables belong to the mockup frame only; the real window needs none of them.
+1. **Tokens only.** Colours, type, spacing and radii come from `src/styles/tokens.css` (generated from `design-system/tokens.json` by `pnpm tokens`). Do not copy hex values out of `copperline.css`. Its `--stage`, `--win-edge` and `--win-shadow` variables belong to the mockup frame only; the real window needs none of them.
 2. **Component specs win.** `design-system/components/<Name>/README.md` holds the props, accessibility rules and do/don'ts for AppShell, Button, Field, StatusChip, PegBoardViewport, GcodeViewer, SimulationControls and MachineStatus. The mockups show how they combine.
 3. **Icons** are Phosphor Regular (Fill only for active or selected states), inline SVG, `viewBox="0 0 256 256"`, `fill="currentColor"`. Do not add another icon set.
 4. **Light and dark.** `data-theme` on `<html>`, default from `prefers-color-scheme`, explicit choice persisted. The theme button in the title bar toggles it.
@@ -61,7 +61,7 @@ The mockup draws an SVG approximation of the peg board. The real scene is Three.
 
 ## Suggested build order
 
-1. Theme service and `TitleBar` plus the Tauri window changes above. Check it runs in `npm run tauri dev` with no OS frame.
+1. Theme service and `TitleBar` plus the Tauri window changes above. Check it runs in `pnpm tauri dev` with no OS frame.
 2. `AppShell` with the three routes (lazy loaded) and the shared panel layout.
 3. Shared pieces: Button, Field, StatusChip, layer list, tiles.
 4. Gerber parsing, then the Three.js `PegBoardViewport` (static board first, then drag and flip).

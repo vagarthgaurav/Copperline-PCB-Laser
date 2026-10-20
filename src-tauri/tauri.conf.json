@@ -6,8 +6,8 @@
   "build": {
     "frontendDist": "../dist/pcb-laser/browser",
     "devUrl": "http://localhost:4200",
-    "beforeDevCommand": "npm start",
-    "beforeBuildCommand": "npm run build"
+    "beforeDevCommand": "pnpm start",
+    "beforeBuildCommand": "pnpm build"
   },
   "app": {
     "windows": [
