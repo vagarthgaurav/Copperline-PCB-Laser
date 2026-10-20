@@ -1,0 +1,147 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  background: var(--surface-200);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.heading {
+  margin: 0;
+}
+
+.count {
+  color: var(--ink-muted);
+}
+
+ol {
+  flex: 1;
+  min-height: 0;
+  box-sizing: border-box;
+  margin: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  list-style: none;
+}
+
+ol:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.empty {
+  flex: 1;
+  margin: 0;
+  padding: var(--space-3);
+  color: var(--ink-muted);
+}
+
+.gl {
+  display: grid;
+  grid-template-columns: calc(var(--digits) * 1ch + 16px) 20px minmax(0, 1fr);
+  align-items: center;
+  height: 22px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--ink);
+  white-space: pre;
+}
+
+.n {
+  height: 100%;
+  padding-right: 8px;
+  line-height: 22px;
+  text-align: right;
+  background: var(--surface-sunken);
+  color: var(--ink-muted);
+}
+
+.car {
+  display: grid;
+  place-items: center;
+  color: var(--accent-strong);
+}
+
+.s {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.g {
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.c {
+  color: var(--ink-muted);
+  font-weight: 400;
+}
+
+.done .n {
+  color: var(--mask);
+}
+
+.done .s {
+  color: var(--ink-muted);
+}
+
+.cur {
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+
+.cur .n {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px var(--space-3);
+  border-top: 1px solid var(--border);
+}
+
+.foot .small {
+  white-space: nowrap;
+}
+
+.bar {
+  flex: 1;
+  box-sizing: border-box;
+  height: 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  overflow: hidden;
+}
+
+.bar > i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}

@@ -33,7 +33,8 @@ describe('Icon', () => {
     for (const name of [
       'sun', 'moon', 'minus', 'square', 'copy', 'x', 'download-simple', 'folder-open',
       'flip-horizontal', 'play', 'pause', 'stop', 'house', 'plug', 'check-circle', 'warning',
-      'cube', 'upload-simple', 'eye', 'eye-slash',
+      'cube', 'upload-simple', 'eye', 'eye-slash', 'caret-right', 'sliders-horizontal',
+      'arrow-right', 'terminal-window', 'link',
     ]) {
       expect(ICONS[name as keyof typeof ICONS].regular.length).toBeGreaterThan(10);
     }
