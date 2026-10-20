@@ -21,7 +21,7 @@ pub fn run() {
       }
       Ok(())
     })
-    .invoke_handler(tauri::generate_handler![gerber::parse_gerber_files])
+    .invoke_handler(tauri::generate_handler![gerber::parse_gerber_files, gerber::archive::read_gerber_zip])
     .run(tauri::generate_context!())
     .expect("error while building tauri application");
 }

@@ -7,7 +7,7 @@ import { Icon } from '../../ui/icon/icon';
 
 /** Accepted when picking files: common Gerber and Excellon extensions from KiCad, Altium, Eagle and friends. */
 export const GERBER_ACCEPT =
-  '.gbr,.ger,.gtl,.gbl,.gts,.gbs,.gto,.gbo,.gko,.gm1,.gml,.drl,.xln,.exc,.txt';
+  '.gbr,.ger,.gtl,.gbl,.gts,.gbs,.gto,.gbo,.gko,.gm1,.gml,.drl,.xln,.exc,.txt,.zip';
 
 /** Rounds to 0.1 mm and drops a trailing ".0". */
 function formatMm(value: number): string {
@@ -31,7 +31,7 @@ function formatMm(value: number): string {
         </div>
       </div>
     } @else if (!loading()) {
-      <app-empty-note>No Gerber loaded. Open a Gerber to see the board.</app-empty-note>
+      <app-empty-note>No Gerber loaded. Open a Gerber or a zip of Gerbers to see the board.</app-empty-note>
     }
 
     <input

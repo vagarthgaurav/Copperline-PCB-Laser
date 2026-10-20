@@ -50,9 +50,11 @@ export class GerberService {
     this._loading.set(true);
     this._error.set(null);
     try {
-      const input: InputFile[] = await Promise.all(
-        files.map(async (file) => ({ name: file.name, content: await file.text() })),
-      );
+      const input = await gatherInputFiles(files);
+      if (input.length === 0) {
+        this._error.set('The zip archive contains no files.');
+        return;
+      }
       const result = await invoke<ParsedProject>('parse_gerber_files', { files: input });
       if (attempt !== this.loadCounter) {
         return;
@@ -64,7 +66,11 @@ export class GerberService {
       }
     } catch (cause) {
       if (attempt === this.loadCounter) {
-        this._error.set(`Could not load the Gerber files: ${describe(cause)}`);
+        this._error.set(
+          cause instanceof ZipReadError
+            ? cause.message
+            : `Could not load the Gerber files: ${describe(cause)}`,
+        );
       }
     } finally {
       if (attempt === this.loadCounter) {
@@ -82,6 +88,35 @@ export class GerberService {
   clearError(): void {
     this._error.set(null);
   }
+}
+
+class ZipReadError extends Error {}
+
+function isZip(file: File): boolean {
+  return (
+    file.name.toLowerCase().endsWith('.zip') ||
+    file.type === 'application/zip' ||
+    file.type === 'application/x-zip-compressed'
+  );
+}
+
+/** Loose files as text first, then the files extracted from each zip in order. */
+async function gatherInputFiles(files: readonly File[]): Promise<InputFile[]> {
+  const loose = await Promise.all(
+    files
+      .filter((file) => !isZip(file))
+      .map(async (file) => ({ name: file.name, content: await file.text() })),
+  );
+  const extracted: InputFile[] = [];
+  for (const zip of files.filter(isZip)) {
+    try {
+      const bytes = new Uint8Array(await zip.arrayBuffer());
+      extracted.push(...(await invoke<InputFile[]>('read_gerber_zip', bytes)));
+    } catch (cause) {
+      throw new ZipReadError(`Could not read ${zip.name}: ${describe(cause)}`);
+    }
+  }
+  return [...loose, ...extracted];
 }
 
 function nothingUsableMessage(result: ParsedProject): string {

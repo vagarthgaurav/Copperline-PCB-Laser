@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 pub type Point = [f64; 2];
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InputFile {
   pub name: String,

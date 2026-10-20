@@ -1,6 +1,7 @@
 //! Gerber (RS-274X) and Excellon parsing behind the `parse_gerber_files`
 //! Tauri command. See the Rust/Angular contract for the output shape.
 
+pub mod archive;
 mod classify;
 mod excellon;
 mod expr;

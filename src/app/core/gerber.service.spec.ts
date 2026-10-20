@@ -169,4 +169,59 @@ describe('GerberService', () => {
     expect(service.project()?.name).toBe('second');
     expect(service.loading()).toBe(false);
   });
+
+  describe('zip files', () => {
+    const zip = (name = 'board.zip') => new File([new Uint8Array([80, 75, 3, 4])], name);
+    const extracted = [{ name: 'z-F_Cu.gbr', content: 'G04 zip*' }];
+
+    it('reads a zip via read_gerber_zip then parses the extracted files', async () => {
+      invokeMock.mockResolvedValueOnce(extracted).mockResolvedValueOnce(parsedProject());
+      const service = TestBed.inject(GerberService);
+      await service.load([zip('BOARD.ZIP')]);
+
+      expect(invokeMock).toHaveBeenNthCalledWith(1, 'read_gerber_zip', expect.any(Uint8Array));
+      expect(invokeMock).toHaveBeenNthCalledWith(2, 'parse_gerber_files', { files: extracted });
+      expect(service.project()).not.toBeNull();
+    });
+
+    it('puts loose files before extracted zip files', async () => {
+      invokeMock.mockResolvedValueOnce(extracted).mockResolvedValueOnce(parsedProject());
+      const service = TestBed.inject(GerberService);
+      await service.load([zip(), ...files()]);
+
+      expect(invokeMock).toHaveBeenLastCalledWith('parse_gerber_files', {
+        files: [
+          { name: 'a-F_Cu.gbr', content: 'G04 top*' },
+          { name: 'a.drl', content: 'M48' },
+          ...extracted,
+        ],
+      });
+    });
+
+    it('fails the load naming the zip and keeps the previous project', async () => {
+      const service = TestBed.inject(GerberService);
+      invokeMock.mockResolvedValueOnce(parsedProject());
+      await service.load(files());
+
+      invokeMock.mockRejectedValueOnce('That file is not a valid zip archive.');
+      await service.load([zip()]);
+
+      expect(invokeMock).toHaveBeenCalledTimes(2);
+      expect(service.error()).toBe(
+        'Could not read board.zip: That file is not a valid zip archive.',
+      );
+      expect(service.project()?.name).toBe('board_v3');
+      expect(service.loading()).toBe(false);
+    });
+
+    it('reports an empty zip', async () => {
+      invokeMock.mockResolvedValueOnce([]);
+      const service = TestBed.inject(GerberService);
+      await service.load([zip()]);
+
+      expect(invokeMock).toHaveBeenCalledTimes(1);
+      expect(service.error()).toBe('The zip archive contains no files.');
+      expect(service.loading()).toBe(false);
+    });
+  });
 });
