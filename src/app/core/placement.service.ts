@@ -18,6 +18,7 @@ export class PlacementService {
   private readonly _offsetY = signal(0);
   private readonly _side = signal<BoardSide>('top');
   private readonly _mirror = signal(false);
+  private readonly _quarterTurns = signal(0);
 
   /** Board offset along X, in mm. */
   readonly offsetX = this._offsetX.asReadonly();
@@ -25,6 +26,8 @@ export class PlacementService {
   readonly offsetY = this._offsetY.asReadonly();
   readonly side = this._side.asReadonly();
   readonly mirror = this._mirror.asReadonly();
+  /** Clockwise quarter turns seen from above, 0..3, about the board centre. */
+  readonly quarterTurns = this._quarterTurns.asReadonly();
 
   setOffset(x: number, y: number): void {
     if (Number.isFinite(x) && Number.isFinite(y)) {
@@ -47,5 +50,17 @@ export class PlacementService {
 
   setMirror(on: boolean): void {
     this._mirror.set(on);
+  }
+
+  /** Adds one clockwise quarter turn, wrapping from 3 back to 0. */
+  rotate(): void {
+    this._quarterTurns.update((turns) => (turns + 1) % 4);
+  }
+
+  /** Sets the rotation; any integer is wrapped into 0..3 (so -1 is 3). Non-integers are ignored. */
+  setQuarterTurns(turns: number): void {
+    if (Number.isInteger(turns)) {
+      this._quarterTurns.set(((turns % 4) + 4) % 4);
+    }
   }
 }

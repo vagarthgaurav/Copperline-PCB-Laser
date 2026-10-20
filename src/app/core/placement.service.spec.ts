@@ -10,6 +10,7 @@ describe('PlacementService', () => {
     expect(service.offsetY()).toBe(0);
     expect(service.side()).toBe('top');
     expect(service.mirror()).toBe(false);
+    expect(service.quarterTurns()).toBe(0);
   });
 
   it('sets the offset', () => {
@@ -51,5 +52,28 @@ describe('PlacementService', () => {
     service.setMirror(true);
     expect(service.side()).toBe('bottom');
     expect(service.mirror()).toBe(true);
+  });
+
+  it('rotates a clockwise quarter turn at a time and wraps', () => {
+    const service = create();
+    service.rotate();
+    expect(service.quarterTurns()).toBe(1);
+    service.rotate();
+    service.rotate();
+    service.rotate();
+    expect(service.quarterTurns()).toBe(0);
+  });
+
+  it('sets the quarter turns, wrapping into 0..3 and ignoring non-integers', () => {
+    const service = create();
+    service.setQuarterTurns(2);
+    expect(service.quarterTurns()).toBe(2);
+    service.setQuarterTurns(-1);
+    expect(service.quarterTurns()).toBe(3);
+    service.setQuarterTurns(5);
+    expect(service.quarterTurns()).toBe(1);
+    service.setQuarterTurns(1.5);
+    service.setQuarterTurns(Number.NaN);
+    expect(service.quarterTurns()).toBe(1);
   });
 });
