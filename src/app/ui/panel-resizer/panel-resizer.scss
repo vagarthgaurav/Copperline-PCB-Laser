@@ -1,0 +1,41 @@
+:host {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  /* Fills the 16px grid column between a panel and the centre. */
+  min-width: var(--space-4);
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+  /* The focus indicator is the handle's own line (see data-keyboard below). */
+  outline: none;
+}
+
+/* The visible line is a short grip centred on the handle; the host itself (full height) is the hit area. */
+:host::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 64px;
+  max-height: 100%;
+  transform: translate(-50%, -50%);
+  border-radius: var(--radius-pill);
+  background: transparent;
+}
+
+:host(:hover)::after {
+  background: var(--border-strong);
+}
+
+:host(.dragging)::after {
+  width: 3px;
+  background: var(--accent);
+}
+
+/* Set only by keyboard focus, never by pointer use. WCAG focus visible. */
+:host([data-keyboard])::after {
+  width: 4px;
+  background: var(--ring);
+}

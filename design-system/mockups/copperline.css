@@ -99,7 +99,7 @@ svg.ic { flex: none; display: block; }
 .chip .m { font-family: var(--font-mono); font-weight: 400; font-size: 12px; }
 
 /* ---- body + panels ---- */
-.body { flex: 1; min-height: 0; display: grid; grid-template-columns: 264px minmax(0, 1fr) 320px; gap: 16px; padding: 16px; }
+.body { flex: 1; min-height: 0; display: grid; grid-template-columns: 320px minmax(0, 1fr) 320px; gap: 16px; padding: 16px; }
 .panel { min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 24px; padding: 16px; background: var(--surface-200); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
 .sec { display: flex; flex-direction: column; gap: 10px; }
 .sec-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }

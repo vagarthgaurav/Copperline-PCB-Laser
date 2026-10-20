@@ -37,11 +37,14 @@ The OS frame is replaced by an in-app title bar. See `window-chrome.html`.
 
 ```
 TitleBar (48px)
-Body: grid 264px | 1fr | 320px, 16px padding, 16px gap
+Body: grid 320px | 16px handle | 1fr | 16px handle | 320px, 16px padding
   Left panel   surface-200, radius-lg, 1px border   per-screen settings
   Centre       3D viewport (flex 1) + optional bottom bar
   Right panel  placement or current-move tiles + G-code viewer (flex 1)
 ```
+
+- The side panels are user-resizable by dragging the thin handle in the 16px gap beside each panel: 320px by default, 240 to 560px, and the centre never drops below 480px. Widths are persisted and shared by all three workspaces.
+- The handle is a focusable `separator`: Left/Right arrows move it 16px (Shift 64px), Home/End jump to the limits, double-click or Enter resets to 320px.
 
 - **Design:** left = Project (file card, "Open Gerber…"), Layers, Placement (offset X/Y, side, mirror), Engraving (power, feed). Centre = viewport only. Right = offset tiles and G-code preview with an Export button.
 - **Simulate:** left = dry-run summary, layer progress, job settings, links to Design and Machine. Centre = viewport plus the SimulationControls bar. Right = current move tiles and G-code with the current line.

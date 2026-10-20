@@ -1,8 +1,9 @@
 :host {
   display: grid;
-  grid-template-columns: 264px minmax(0, 1fr) 320px;
   grid-template-rows: minmax(0, 1fr);
-  gap: var(--space-4);
+  /* Column widths are bound from the host (panel widths are user-resizable);
+     the 16px gap between panel and centre is the resize handle column. */
+  gap: 0;
   flex: 1;
   box-sizing: border-box;
   min-height: 0;
