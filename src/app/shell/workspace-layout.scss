@@ -1,0 +1,22 @@
+:host {
+  display: grid;
+  grid-template-columns: 264px minmax(0, 1fr) 320px;
+  grid-template-rows: minmax(0, 1fr);
+  gap: var(--space-4);
+  flex: 1;
+  box-sizing: border-box;
+  min-height: 0;
+  padding: var(--space-4);
+}
+
+app-panel {
+  overflow-y: auto;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  min-height: 0;
+}
