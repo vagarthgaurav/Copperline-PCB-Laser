@@ -1,0 +1,144 @@
+<!-- @dsCard group="Viewport" height=560 subtitle="Peg-board 3D view with side switch, tools, offset readout and legend" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PegBoardViewport</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  body { margin:0; padding:var(--space-4); background:var(--surface-100); color:var(--ink); font-family:var(--font-sans); }
+  .stack { max-width:720px; display:flex; flex-direction:column; gap:var(--space-4); }
+  .frame { position:relative; background:var(--scene-bg); border:1px solid var(--border-strong); border-radius:var(--radius-lg); overflow:hidden; aspect-ratio:720/380; }
+  .frame svg.scene { display:block; width:100%; height:100%; }
+  .overlay { position:absolute; display:flex; align-items:center; gap:var(--space-2); }
+  .tl { top:var(--space-3); left:var(--space-3); }
+  .tr { top:var(--space-3); right:var(--space-3); }
+  .bl { bottom:var(--space-3); left:var(--space-3); }
+  .br { bottom:var(--space-3); right:var(--space-3); }
+  .panel { background:var(--surface-200); border:1px solid var(--border-strong); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); }
+  /* segmented */
+  .seg { display:inline-flex; padding:2px; gap:2px; background:var(--surface-sunken); }
+  .seg label { position:relative; }
+  .seg input { position:absolute; opacity:0; inset:0; margin:0; cursor:pointer; }
+  .seg span { display:inline-flex; align-items:center; min-height:32px; padding:0 var(--space-3); border-radius:var(--radius-sm); color:var(--ink); border:1px solid transparent; }
+  .seg input:checked + span { background:var(--accent-soft); border-color:var(--border-strong); font-weight:600; }
+  .seg input:focus-visible + span { outline:2px solid var(--ring); outline-offset:2px; }
+  /* tools */
+  .tools { display:inline-flex; padding:2px; gap:2px; }
+  .tool { display:inline-grid; place-items:center; width:32px; height:32px; padding:0; border-radius:var(--radius-sm); border:1px solid transparent; background:transparent; color:var(--ink); cursor:pointer; }
+  .tool:hover, .tool.is-hover { background:var(--surface-300); border-color:var(--border-strong); }
+  .tool[aria-pressed="true"] { background:var(--accent-soft); border-color:var(--border-strong); color:var(--accent-strong); }
+  .tool:disabled { opacity:.45; cursor:not-allowed; }
+  .tool:focus-visible { outline:2px solid var(--ring); outline-offset:2px; }
+  .chip { display:inline-flex; align-items:baseline; gap:var(--space-2); padding:var(--space-1) var(--space-3); min-height:32px; box-sizing:border-box; align-items:center; }
+  .chip .label { color:var(--ink-muted); text-transform:uppercase; }
+  .legend { display:grid; grid-template-columns:auto auto; gap:var(--space-1) var(--space-4); padding:var(--space-2) var(--space-3); margin:0; list-style:none; }
+  .legend li { display:flex; align-items:center; gap:var(--space-2); color:var(--ink); }
+  .sw { width:14px; height:14px; border-radius:var(--radius-sm); border:1px solid var(--border-strong); flex:none; }
+  .sw-board { background:var(--scene-board); } .sw-copper { background:var(--scene-copper); }
+  .sw-done { background:var(--scene-done); } .sw-laser { background:var(--scene-laser); }
+  /* scene */
+  .floor { fill:var(--scene-floor); stroke:var(--border-strong); stroke-width:1; stroke-linejoin:round; }
+  .hole { fill:var(--scene-peg); }
+  .board { fill:var(--scene-board); stroke:var(--border-strong); stroke-width:1.5; stroke-linejoin:round; vector-effect:non-scaling-stroke; }
+  .copper { fill:none; stroke:var(--scene-copper); stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
+  .pad { fill:var(--scene-copper); }
+  .engraved { fill:none; stroke:var(--scene-done); stroke-width:3.6; stroke-linecap:round; stroke-linejoin:round; }
+  .ahead { fill:none; stroke:var(--scene-laser); stroke-width:2; stroke-dasharray:5 4; stroke-linecap:round; stroke-linejoin:round; }
+  .peg rect, .peg ellipse { fill:var(--scene-peg); }
+  .peg .top { stroke:var(--scene-bg); stroke-width:1.5; }
+  .lbl { fill:var(--ink); font:500 12px var(--font-sans); paint-order:stroke; stroke:var(--scene-floor); stroke-width:4px; stroke-linejoin:round; }
+  svg [hidden] { display:none; }
+  .beam { stroke:var(--scene-laser); stroke-width:2; }
+  .spot { fill:var(--scene-laser); stroke:var(--scene-bg); stroke-width:1.5; }
+  .head { fill:var(--scene-laser); stroke:var(--border-strong); stroke-width:1.5; stroke-linejoin:round; }
+  .note { color:var(--ink-muted); margin:0; }
+  .states { display:flex; flex-wrap:wrap; gap:var(--space-6); align-items:center; }
+  .states figure { margin:0; display:flex; flex-direction:column; gap:var(--space-1); align-items:flex-start; }
+  .states figcaption { color:var(--ink-muted); }
+</style>
+</head>
+<body class="body">
+<div class="stack">
+  <div class="frame" id="frame" data-side="top">
+    <svg class="scene" viewBox="0 0 720 380" role="img" aria-label="Peg board seen from above at an angle. A green circuit board sits against two tall alignment pegs, offset from the origin peg. Copper traces are partly engraved and the laser head is at the end of the engraved path.">
+      <g id="sceneTop">
+<polygon class="floor" points="620.4,210.0 395.3,340.0 395.3,350.0 620.4,220.0"/>
+<polygon class="floor" points="100.8,170.0 395.3,340.0 395.3,350.0 100.8,180.0"/>
+<polygon class="floor" points="326.0,40.0 620.4,210.0 395.3,340.0 100.8,170.0"/>
+<g transform="translate(326 40) matrix(0.8660254037844386 0.5 -0.8660254037844386 0.5 0 0)"><circle class="hole" cx="30" cy="30" r="4"/><circle class="hole" cx="30" cy="70" r="4"/><circle class="hole" cx="30" cy="110" r="4"/><circle class="hole" cx="30" cy="150" r="4"/><circle class="hole" cx="30" cy="190" r="4"/><circle class="hole" cx="30" cy="230" r="4"/><circle class="hole" cx="70" cy="30" r="4"/><circle class="hole" cx="70" cy="110" r="4"/><circle class="hole" cx="70" cy="190" r="4"/><circle class="hole" cx="70" cy="230" r="4"/><circle class="hole" cx="110" cy="30" r="4"/><circle class="hole" cx="110" cy="70" r="4"/><circle class="hole" cx="110" cy="110" r="4"/><circle class="hole" cx="110" cy="150" r="4"/><circle class="hole" cx="110" cy="190" r="4"/><circle class="hole" cx="110" cy="230" r="4"/><circle class="hole" cx="150" cy="30" r="4"/><circle class="hole" cx="150" cy="70" r="4"/><circle class="hole" cx="150" cy="110" r="4"/><circle class="hole" cx="150" cy="150" r="4"/><circle class="hole" cx="150" cy="190" r="4"/><circle class="hole" cx="150" cy="230" r="4"/><circle class="hole" cx="190" cy="30" r="4"/><circle class="hole" cx="190" cy="70" r="4"/><circle class="hole" cx="190" cy="110" r="4"/><circle class="hole" cx="190" cy="150" r="4"/><circle class="hole" cx="190" cy="190" r="4"/><circle class="hole" cx="190" cy="230" r="4"/><circle class="hole" cx="230" cy="30" r="4"/><circle class="hole" cx="230" cy="70" r="4"/><circle class="hole" cx="230" cy="110" r="4"/><circle class="hole" cx="230" cy="150" r="4"/><circle class="hole" cx="230" cy="190" r="4"/><circle class="hole" cx="230" cy="230" r="4"/><circle class="hole" cx="270" cy="30" r="4"/><circle class="hole" cx="270" cy="70" r="4"/><circle class="hole" cx="270" cy="110" r="4"/><circle class="hole" cx="270" cy="150" r="4"/><circle class="hole" cx="270" cy="190" r="4"/><circle class="hole" cx="270" cy="230" r="4"/><circle class="hole" cx="310" cy="30" r="4"/><circle class="hole" cx="310" cy="70" r="4"/><circle class="hole" cx="310" cy="110" r="4"/><circle class="hole" cx="310" cy="150" r="4"/><circle class="hole" cx="310" cy="190" r="4"/><circle class="hole" cx="310" cy="230" r="4"/></g>
+<polygon class="board" points="492.3,184.0 397.0,239.0 397.0,245.0 492.3,190.0"/>
+<polygon class="board" points="249.8,154.0 397.0,239.0 397.0,245.0 249.8,160.0"/>
+<g transform="translate(0 -6)"><g transform="translate(326 40) matrix(0.8660254037844386 0.5 -0.8660254037844386 0.5 0 0)"><rect class="board" x="76" y="54" width="170" height="110"/><g transform="translate(76 54)"><g><path class="copper" d="M20 20 H85 V55 H120"/><path class="copper" d="M20 90 H85"/><path class="copper" d="M120 55 H150 V30"/><path class="copper" d="M85 90 H120 V55"/><circle class="pad" cx="20" cy="20" r="5.5"/><circle class="pad" cx="20" cy="90" r="5.5"/><circle class="pad" cx="85" cy="90" r="5.5"/><circle class="pad" cx="120" cy="55" r="5.5"/><circle class="pad" cx="150" cy="30" r="5.5"/><circle class="pad" cx="150" cy="80" r="5.5"/><path class="engraved" d="M20 20 H85 V55 H120"/><path class="engraved" d="M20 90 H85"/><path class="engraved" d="M120 55 H135"/><path class="ahead" d="M135 55 H150 V30"/></g></g></g></g>
+<g class="peg"><ellipse cx="326.0" cy="110.0" rx="6" ry="3.4"/><rect x="320.0" y="86.0" width="12" height="24"/><ellipse class="top" cx="326.0" cy="86.0" rx="6" ry="3.4"/></g>
+<g class="peg"><ellipse cx="256.7" cy="150.0" rx="6" ry="3.4"/><rect x="250.7" y="126.0" width="12" height="24"/><ellipse class="top" cx="256.7" cy="126.0" rx="6" ry="3.4"/></g>
+<text class="lbl" x="312.0" y="84.0" text-anchor="end">Origin peg</text>
+<g class="laser"><line class="beam" x1="414.3" y1="142.0" x2="414.3" y2="194.0"/><circle class="spot" cx="414.3" cy="194.0" r="4"/><path class="head" d="M399.3 108.0a4 4 0 0 1 4-4h22a4 4 0 0 1 4 4v26l-8 8h-14l-8-8z"/></g>
+      </g>
+      <g id="sceneBottom" hidden>
+<polygon class="floor" points="620.4,210.0 395.3,340.0 395.3,350.0 620.4,220.0"/>
+<polygon class="floor" points="100.8,170.0 395.3,340.0 395.3,350.0 100.8,180.0"/>
+<polygon class="floor" points="326.0,40.0 620.4,210.0 395.3,340.0 100.8,170.0"/>
+<g transform="translate(326 40) matrix(0.8660254037844386 0.5 -0.8660254037844386 0.5 0 0)"><circle class="hole" cx="30" cy="30" r="4"/><circle class="hole" cx="30" cy="70" r="4"/><circle class="hole" cx="30" cy="110" r="4"/><circle class="hole" cx="30" cy="150" r="4"/><circle class="hole" cx="30" cy="190" r="4"/><circle class="hole" cx="30" cy="230" r="4"/><circle class="hole" cx="70" cy="30" r="4"/><circle class="hole" cx="70" cy="110" r="4"/><circle class="hole" cx="70" cy="190" r="4"/><circle class="hole" cx="70" cy="230" r="4"/><circle class="hole" cx="110" cy="30" r="4"/><circle class="hole" cx="110" cy="70" r="4"/><circle class="hole" cx="110" cy="110" r="4"/><circle class="hole" cx="110" cy="150" r="4"/><circle class="hole" cx="110" cy="190" r="4"/><circle class="hole" cx="110" cy="230" r="4"/><circle class="hole" cx="150" cy="30" r="4"/><circle class="hole" cx="150" cy="70" r="4"/><circle class="hole" cx="150" cy="110" r="4"/><circle class="hole" cx="150" cy="150" r="4"/><circle class="hole" cx="150" cy="190" r="4"/><circle class="hole" cx="150" cy="230" r="4"/><circle class="hole" cx="190" cy="30" r="4"/><circle class="hole" cx="190" cy="70" r="4"/><circle class="hole" cx="190" cy="110" r="4"/><circle class="hole" cx="190" cy="150" r="4"/><circle class="hole" cx="190" cy="190" r="4"/><circle class="hole" cx="190" cy="230" r="4"/><circle class="hole" cx="230" cy="30" r="4"/><circle class="hole" cx="230" cy="70" r="4"/><circle class="hole" cx="230" cy="110" r="4"/><circle class="hole" cx="230" cy="150" r="4"/><circle class="hole" cx="230" cy="190" r="4"/><circle class="hole" cx="230" cy="230" r="4"/><circle class="hole" cx="270" cy="30" r="4"/><circle class="hole" cx="270" cy="70" r="4"/><circle class="hole" cx="270" cy="110" r="4"/><circle class="hole" cx="270" cy="150" r="4"/><circle class="hole" cx="270" cy="190" r="4"/><circle class="hole" cx="270" cy="230" r="4"/><circle class="hole" cx="310" cy="30" r="4"/><circle class="hole" cx="310" cy="70" r="4"/><circle class="hole" cx="310" cy="110" r="4"/><circle class="hole" cx="310" cy="150" r="4"/><circle class="hole" cx="310" cy="190" r="4"/><circle class="hole" cx="310" cy="230" r="4"/></g>
+<polygon class="board" points="492.3,184.0 397.0,239.0 397.0,245.0 492.3,190.0"/>
+<polygon class="board" points="249.8,154.0 397.0,239.0 397.0,245.0 249.8,160.0"/>
+<g transform="translate(0 -6)"><g transform="translate(326 40) matrix(0.8660254037844386 0.5 -0.8660254037844386 0.5 0 0)"><rect class="board" x="76" y="54" width="170" height="110"/><g transform="translate(76 54)"><g transform="translate(170 0) scale(-1 1)"><path class="copper" d="M20 20 H85 V55 H120"/><path class="copper" d="M20 90 H85"/><path class="copper" d="M120 55 H150 V30"/><path class="copper" d="M85 90 H120 V55"/><circle class="pad" cx="20" cy="20" r="5.5"/><circle class="pad" cx="20" cy="90" r="5.5"/><circle class="pad" cx="85" cy="90" r="5.5"/><circle class="pad" cx="120" cy="55" r="5.5"/><circle class="pad" cx="150" cy="30" r="5.5"/><circle class="pad" cx="150" cy="80" r="5.5"/><path class="ahead" d="M20 20 H85 V55 H120"/></g></g></g></g>
+<g class="peg"><ellipse cx="326.0" cy="110.0" rx="6" ry="3.4"/><rect x="320.0" y="86.0" width="12" height="24"/><ellipse class="top" cx="326.0" cy="86.0" rx="6" ry="3.4"/></g>
+<g class="peg"><ellipse cx="256.7" cy="150.0" rx="6" ry="3.4"/><rect x="250.7" y="126.0" width="12" height="24"/><ellipse class="top" cx="256.7" cy="126.0" rx="6" ry="3.4"/></g>
+<text class="lbl" x="312.0" y="84.0" text-anchor="end">Origin peg</text>
+<g class="laser"><line class="beam" x1="457.6" y1="132.0" x2="457.6" y2="184.0"/><circle class="spot" cx="457.6" cy="184.0" r="4"/><path class="head" d="M442.6 98.0a4 4 0 0 1 4-4h22a4 4 0 0 1 4 4v26l-8 8h-14l-8-8z"/></g>
+      </g>
+    </svg>
+    <div class="overlay tl panel seg" role="radiogroup" aria-label="Board side">
+      <label><input type="radio" name="side" value="top" checked><span class="body">Top</span></label>
+      <label><input type="radio" name="side" value="bottom"><span class="body">Bottom</span></label>
+    </div>
+    <div class="overlay tr panel tools" role="group" aria-label="Move board">
+      <button type="button" class="tool " aria-label="Move board" title="Move board" aria-pressed="true"><svg class="ic" width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M96,136H64v24a8,8,0,0,1-13.66,5.66l-32-32a8,8,0,0,1,0-11.32l32-32A8,8,0,0,1,64,96v24H96a8,8,0,0,1,0,16Zm0-72h24V96a8,8,0,0,0,16,0V64h24a8,8,0,0,0,5.66-13.66l-32-32a8,8,0,0,0-11.32,0l-32,32A8,8,0,0,0,96,64Zm141.66,58.34-32-32A8,8,0,0,0,192,96v24H160a8,8,0,0,0,0,16h32v24a8,8,0,0,0,13.66,5.66l32-32A8,8,0,0,0,237.66,122.34ZM160,192H136V160a8,8,0,0,0-16,0v32H96a8,8,0,0,0-5.66,13.66l32,32a8,8,0,0,0,11.32,0l32-32A8,8,0,0,0,160,192Z"/></svg></button>
+      <button type="button" class="tool " aria-label="Rotate 90 degrees" title="Rotate 90 degrees" aria-pressed="false"><svg class="ic" width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M240,56v48a8,8,0,0,1-8,8H184a8,8,0,0,1,0-16H211.4L184.81,71.64l-.25-.24a80,80,0,1,0-1.67,114.78,8,8,0,0,1,11,11.63A95.44,95.44,0,0,1,128,224h-1.32A96,96,0,1,1,195.75,60L224,85.8V56a8,8,0,1,1,16,0Z"/></svg></button>
+      <button type="button" class="tool " aria-label="Flip board" title="Flip board" aria-pressed="false"><svg class="ic" width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M107.18,24.33a15.86,15.86,0,0,0-17.92,9.45l-.06.14-64,159.93A16,16,0,0,0,40,216h64a16,16,0,0,0,16-16V40A15.85,15.85,0,0,0,107.18,24.33ZM104,200H40l.06-.15L104,40Zm126.77-6.15-64-159.93-.06-.14A16,16,0,0,0,136,40V200a16,16,0,0,0,16,16h64a16,16,0,0,0,14.78-22.15ZM152,200V40l63.93,159.84.06.15Z"/></svg></button>
+    </div>
+    <div class="overlay bl panel chip"><span class="label">Offset</span><span class="code">X 12.50 Y 6.00 mm</span></div>
+    <ul class="overlay br panel legend small" aria-label="Legend">
+      <li><span class="sw sw-board"></span>Board</li>
+      <li><span class="sw sw-copper"></span>Copper</li>
+      <li><span class="sw sw-done"></span>Engraved</li>
+      <li><span class="sw sw-laser"></span>Laser</li>
+    </ul>
+  </div>
+  <p class="note small" id="note">Top side: 3 of 4 traces engraved. Switch to Bottom to see the flipped, mirrored board.</p>
+  <div class="states">
+    <figure><div class="panel tools"><button type="button" class="tool " aria-label="Move board (default)" title="Move board (default)"><svg class="ic" width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M90.34,61.66a8,8,0,0,1,0-11.32l32-32a8,8,0,0,1,11.32,0l32,32a8,8,0,0,1-11.32,11.32L136,43.31V96a8,8,0,0,1-16,0V43.31L101.66,61.66A8,8,0,0,1,90.34,61.66Zm64,132.68L136,212.69V160a8,8,0,0,0-16,0v52.69l-18.34-18.35a8,8,0,0,0-11.32,11.32l32,32a8,8,0,0,0,11.32,0l32-32a8,8,0,0,0-11.32-11.32Zm83.32-72-32-32a8,8,0,0,0-11.32,11.32L212.69,120H160a8,8,0,0,0,0,16h52.69l-18.35,18.34a8,8,0,0,0,11.32,11.32l32-32A8,8,0,0,0,237.66,122.34ZM43.31,136H96a8,8,0,0,0,0-16H43.31l18.35-18.34A8,8,0,0,0,50.34,90.34l-32,32a8,8,0,0,0,0,11.32l32,32a8,8,0,0,0,11.32-11.32Z"/></svg></button></div><figcaption class="small">Default</figcaption></figure>
+    <figure><div class="panel tools"><button type="button" class="tool is-hover" aria-label="Move board (hover)" title="Move board (hover)"><svg class="ic" width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M90.34,61.66a8,8,0,0,1,0-11.32l32-32a8,8,0,0,1,11.32,0l32,32a8,8,0,0,1-11.32,11.32L136,43.31V96a8,8,0,0,1-16,0V43.31L101.66,61.66A8,8,0,0,1,90.34,61.66Zm64,132.68L136,212.69V160a8,8,0,0,0-16,0v52.69l-18.34-18.35a8,8,0,0,0-11.32,11.32l32,32a8,8,0,0,0,11.32,0l32-32a8,8,0,0,0-11.32-11.32Zm83.32-72-32-32a8,8,0,0,0-11.32,11.32L212.69,120H160a8,8,0,0,0,0,16h52.69l-18.35,18.34a8,8,0,0,0,11.32,11.32l32-32A8,8,0,0,0,237.66,122.34ZM43.31,136H96a8,8,0,0,0,0-16H43.31l18.35-18.34A8,8,0,0,0,50.34,90.34l-32,32a8,8,0,0,0,0,11.32l32,32a8,8,0,0,0,11.32-11.32Z"/></svg></button></div><figcaption class="small">Hover</figcaption></figure>
+    <figure><div class="panel tools"><button type="button" class="tool " aria-label="Move board (active)" title="Move board (active)" aria-pressed="true"><svg class="ic" width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M96,136H64v24a8,8,0,0,1-13.66,5.66l-32-32a8,8,0,0,1,0-11.32l32-32A8,8,0,0,1,64,96v24H96a8,8,0,0,1,0,16Zm0-72h24V96a8,8,0,0,0,16,0V64h24a8,8,0,0,0,5.66-13.66l-32-32a8,8,0,0,0-11.32,0l-32,32A8,8,0,0,0,96,64Zm141.66,58.34-32-32A8,8,0,0,0,192,96v24H160a8,8,0,0,0,0,16h32v24a8,8,0,0,0,13.66,5.66l32-32A8,8,0,0,0,237.66,122.34ZM160,192H136V160a8,8,0,0,0-16,0v32H96a8,8,0,0,0-5.66,13.66l32,32a8,8,0,0,0,11.32,0l32-32A8,8,0,0,0,160,192Z"/></svg></button></div><figcaption class="small">Active</figcaption></figure>
+    <figure><div class="panel tools"><button type="button" class="tool " aria-label="Move board (disabled)" title="Move board (disabled)" disabled><svg class="ic" width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M90.34,61.66a8,8,0,0,1,0-11.32l32-32a8,8,0,0,1,11.32,0l32,32a8,8,0,0,1-11.32,11.32L136,43.31V96a8,8,0,0,1-16,0V43.31L101.66,61.66A8,8,0,0,1,90.34,61.66Zm64,132.68L136,212.69V160a8,8,0,0,0-16,0v52.69l-18.34-18.35a8,8,0,0,0-11.32,11.32l32,32a8,8,0,0,0,11.32,0l32-32a8,8,0,0,0-11.32-11.32Zm83.32-72-32-32a8,8,0,0,0-11.32,11.32L212.69,120H160a8,8,0,0,0,0,16h52.69l-18.35,18.34a8,8,0,0,0,11.32,11.32l32-32A8,8,0,0,0,237.66,122.34ZM43.31,136H96a8,8,0,0,0,0-16H43.31l18.35-18.34A8,8,0,0,0,50.34,90.34l-32,32a8,8,0,0,0,0,11.32l32,32a8,8,0,0,0,11.32-11.32Z"/></svg></button></div><figcaption class="small">Disabled</figcaption></figure>
+  </div>
+</div>
+<script>
+  const frame = document.getElementById('frame');
+  const note = document.getElementById('note');
+  frame.querySelectorAll('input[name=side]').forEach(r => r.addEventListener('change', () => {
+    const bottom = r.value === 'bottom' && r.checked;
+    if (!r.checked) return;
+    document.getElementById('sceneTop').toggleAttribute('hidden', bottom);
+    document.getElementById('sceneBottom').toggleAttribute('hidden', !bottom);
+    note.textContent = bottom
+      ? 'Bottom side: board flipped and mirrored, nothing engraved yet.'
+      : 'Top side: 3 of 4 traces engraved. Switch to Bottom to see the flipped, mirrored board.';
+  }));
+  const WEIGHTS = [
+    ['<path d="M90.34,61.66a8,8,0,0,1,0-11.32l32-32a8,8,0,0,1,11.32,0l32,32a8,8,0,0,1-11.32,11.32L136,43.31V96a8,8,0,0,1-16,0V43.31L101.66,61.66A8,8,0,0,1,90.34,61.66Zm64,132.68L136,212.69V160a8,8,0,0,0-16,0v52.69l-18.34-18.35a8,8,0,0,0-11.32,11.32l32,32a8,8,0,0,0,11.32,0l32-32a8,8,0,0,0-11.32-11.32Zm83.32-72-32-32a8,8,0,0,0-11.32,11.32L212.69,120H160a8,8,0,0,0,0,16h52.69l-18.35,18.34a8,8,0,0,0,11.32,11.32l32-32A8,8,0,0,0,237.66,122.34ZM43.31,136H96a8,8,0,0,0,0-16H43.31l18.35-18.34A8,8,0,0,0,50.34,90.34l-32,32a8,8,0,0,0,0,11.32l32,32a8,8,0,0,0,11.32-11.32Z"/>', '<path d="M96,136H64v24a8,8,0,0,1-13.66,5.66l-32-32a8,8,0,0,1,0-11.32l32-32A8,8,0,0,1,64,96v24H96a8,8,0,0,1,0,16Zm0-72h24V96a8,8,0,0,0,16,0V64h24a8,8,0,0,0,5.66-13.66l-32-32a8,8,0,0,0-11.32,0l-32,32A8,8,0,0,0,96,64Zm141.66,58.34-32-32A8,8,0,0,0,192,96v24H160a8,8,0,0,0,0,16h32v24a8,8,0,0,0,13.66,5.66l32-32A8,8,0,0,0,237.66,122.34ZM160,192H136V160a8,8,0,0,0-16,0v32H96a8,8,0,0,0-5.66,13.66l32,32a8,8,0,0,0,11.32,0l32-32A8,8,0,0,0,160,192Z"/>'],
+    ['<path d="M240,56v48a8,8,0,0,1-8,8H184a8,8,0,0,1,0-16H211.4L184.81,71.64l-.25-.24a80,80,0,1,0-1.67,114.78,8,8,0,0,1,11,11.63A95.44,95.44,0,0,1,128,224h-1.32A96,96,0,1,1,195.75,60L224,85.8V56a8,8,0,1,1,16,0Z"/>', '<path d="M240,56v48a8,8,0,0,1-8,8H184a8,8,0,0,1-5.66-13.66l17-17-10.55-9.65-.25-.24a80,80,0,1,0-1.67,114.78,8,8,0,1,1,11,11.63A95.44,95.44,0,0,1,128,224h-1.32A96,96,0,1,1,195.75,60l10.93,10L226.34,50.3A8,8,0,0,1,240,56Z"/>'],
+    ['<path d="M107.18,24.33a15.86,15.86,0,0,0-17.92,9.45l-.06.14-64,159.93A16,16,0,0,0,40,216h64a16,16,0,0,0,16-16V40A15.85,15.85,0,0,0,107.18,24.33ZM104,200H40l.06-.15L104,40Zm126.77-6.15-64-159.93-.06-.14A16,16,0,0,0,136,40V200a16,16,0,0,0,16,16h64a16,16,0,0,0,14.78-22.15ZM152,200V40l63.93,159.84.06.15Z"/>', '<path d="M120,40V200a16,16,0,0,1-16,16H40a16,16,0,0,1-14.78-22.15l64-159.93.06-.14A16,16,0,0,1,120,40ZM229.33,208.84A16,16,0,0,1,216,216H152a16,16,0,0,1-16-16V40a16,16,0,0,1,30.74-6.23l.06.14,64,159.93A16,16,0,0,1,229.33,208.84ZM216,200l-.06-.15L152,40V200Z"/>']
+  ];
+  const tools = frame.querySelectorAll('.tr .tool');
+  tools.forEach((b, i) => b.addEventListener('click', () => {
+    tools.forEach((o, j) => {
+      const on = o === b;
+      o.setAttribute('aria-pressed', String(on));
+      o.querySelector('svg').innerHTML = WEIGHTS[j][on ? 1 : 0];
+    });
+  }));
+</script>
+</body>
+</html>

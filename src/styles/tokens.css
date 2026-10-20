@@ -1,0 +1,180 @@
+/* Copperline — generated from design-system/tokens.json by scripts/build-tokens.mjs. Do not edit. */
+
+:root,
+[data-theme='light'] {
+  --surface-100: #f6f1ea;
+  --surface-200: #fbf8f3;
+  --surface-300: #fffdfa;
+  --surface-sunken: #ece4d9;
+  --border: #e0d6c8;
+  --border-strong: #8f8171;
+  --ink: #2a211a;
+  --ink-muted: #66594b;
+  --accent: #b4532a;
+  --accent-strong: #9a431f;
+  --accent-soft: #f3dfd2;
+  --on-accent: #fffaf5;
+  --mask: #2f6b4f;
+  --mask-soft: #d9eadf;
+  --on-mask: #f4faf6;
+  --warning: #8a5a00;
+  --warning-soft: #f6e6bd;
+  --danger: #a8322d;
+  --danger-soft: #f6dcd8;
+  --ring: #2b5d8a;
+  --scene-bg: #e9e0d3;
+  --scene-floor: #d6c9b6;
+  --scene-peg: #6e6152;
+  --scene-board: #35523f;
+  --scene-copper: #d89a62;
+  --scene-laser: #ff7a45;
+  --scene-done: #f2e4cc;
+  --shadow-sm: 0 1px 2px rgba(60, 40, 20, 0.10);
+  --shadow-md: 0 8px 24px rgba(60, 40, 20, 0.14);
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --surface-100: #1b1713;
+  --surface-200: #231e19;
+  --surface-300: #2c2620;
+  --surface-sunken: #14110e;
+  --border: #3a322a;
+  --border-strong: #7d6f60;
+  --ink: #f2ebe2;
+  --ink-muted: #bfb1a1;
+  --accent: #e08a5b;
+  --accent-strong: #f0a37c;
+  --accent-soft: #3d2a1f;
+  --on-accent: #1f130c;
+  --mask: #6fc096;
+  --mask-soft: #1f3a2c;
+  --on-mask: #0f1f16;
+  --warning: #e3b04b;
+  --warning-soft: #3b2f14;
+  --danger: #f08a80;
+  --danger-soft: #402220;
+  --ring: #8ec1f0;
+  --scene-bg: #14110e;
+  --scene-floor: #2a241e;
+  --scene-peg: #8d7e6c;
+  --scene-board: #3f6b4e;
+  --scene-copper: #f0b87e;
+  --scene-laser: #ff8a5c;
+  --scene-done: #f6e8d0;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.55);
+  color-scheme: dark;
+}
+
+/* Follow the OS until the user picks a theme explicitly. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --surface-100: #1b1713;
+    --surface-200: #231e19;
+    --surface-300: #2c2620;
+    --surface-sunken: #14110e;
+    --border: #3a322a;
+    --border-strong: #7d6f60;
+    --ink: #f2ebe2;
+    --ink-muted: #bfb1a1;
+    --accent: #e08a5b;
+    --accent-strong: #f0a37c;
+    --accent-soft: #3d2a1f;
+    --on-accent: #1f130c;
+    --mask: #6fc096;
+    --mask-soft: #1f3a2c;
+    --on-mask: #0f1f16;
+    --warning: #e3b04b;
+    --warning-soft: #3b2f14;
+    --danger: #f08a80;
+    --danger-soft: #402220;
+    --ring: #8ec1f0;
+    --scene-bg: #14110e;
+    --scene-floor: #2a241e;
+    --scene-peg: #8d7e6c;
+    --scene-board: #3f6b4e;
+    --scene-copper: #f0b87e;
+    --scene-laser: #ff8a5c;
+    --scene-done: #f6e8d0;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.55);
+    color-scheme: dark;
+  }
+}
+
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+  --font-sans: "Instrument Sans", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "Instrument Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-size: 40px;
+  line-height: 44px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.heading {
+  font-family: var(--font-display);
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+}
+.body {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+}
+.body-strong {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+}
+.small {
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  line-height: 18px;
+  font-weight: 400;
+}
+.label {
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.code {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 20px;
+  font-weight: 400;
+}
+.readout {
+  font-family: var(--font-mono);
+  font-size: 26px;
+  line-height: 30px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}

@@ -1,0 +1,46 @@
+<!-- @dsCard height=288 subtitle="Cover" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600&family=Instrument+Sans:wght@400&display=swap">
+<style>
+  html, body { margin: 0; background: var(--surface-100); }
+  svg { display: block; width: 960px; height: 288px; }
+  .ground { fill: var(--surface-100); }
+  .copper { fill: var(--accent); rx: var(--radius-lg); }
+  .board { fill: var(--scene-board); rx: var(--radius-lg); }
+  .ink { fill: var(--ink); rx: var(--radius-lg); }
+  .tint { fill: var(--accent-soft); rx: var(--radius-lg); }
+  .hole { fill: var(--surface-100); }
+  .peg { fill: var(--accent); }
+  .name { font-family: var(--font-display); font-weight: 600; font-size: 72px; letter-spacing: -0.02em; fill: var(--ink); }
+  .tag { font-family: var(--font-sans); font-size: 13px; fill: var(--ink-muted); }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 960 288" role="img" aria-label="Copperline">
+  <!-- blocks: accent 240x192 (10x8 space-6), scene-board 208x120, ink 208x160, accent-soft 240x88; all radius-lg, three bleed off the top, right or bottom edge.
+       arrangement: staggered modular stack right of x=480, two columns offset by 8 (space-2) gutters.
+       pattern: peg-hole dot grid, because the product pegs a PCB into a hole grid; 24 (space-6) pitch, ground cut out of the ink block, two copper pegs standing in it.
+       steps: space-2 gutters, space-6 pitch, radius-lg corners. -->
+  <rect class="ground" width="960" height="288"/>
+  <rect class="copper" x="504" y="-16" width="240" height="208"/>
+  <rect class="board" x="752" y="-16" width="224" height="136"/>
+  <rect class="ink" x="752" y="128" width="224" height="176"/>
+  <rect class="tint" x="504" y="200" width="240" height="104"/>
+  <g class="hole">
+    <circle cx="776" cy="152" r="4"/><circle cx="800" cy="152" r="4"/><circle cx="824" cy="152" r="4"/><circle cx="848" cy="152" r="4"/><circle cx="872" cy="152" r="4"/><circle cx="896" cy="152" r="4"/><circle cx="920" cy="152" r="4"/><circle cx="944" cy="152" r="4"/>
+    <circle cx="776" cy="176" r="4"/><circle cx="800" cy="176" r="4"/><circle cx="824" cy="176" r="4"/><circle cx="848" cy="176" r="4"/><circle cx="872" cy="176" r="4"/><circle cx="896" cy="176" r="4"/><circle cx="920" cy="176" r="4"/><circle cx="944" cy="176" r="4"/>
+    <circle cx="776" cy="200" r="4"/><circle cx="800" cy="200" r="4"/><circle cx="824" cy="200" r="4"/><circle cx="848" cy="200" r="4"/><circle cx="872" cy="200" r="4"/><circle cx="896" cy="200" r="4"/><circle cx="920" cy="200" r="4"/><circle cx="944" cy="200" r="4"/>
+    <circle cx="776" cy="224" r="4"/><circle cx="800" cy="224" r="4"/><circle cx="824" cy="224" r="4"/><circle cx="848" cy="224" r="4"/><circle cx="872" cy="224" r="4"/><circle cx="896" cy="224" r="4"/><circle cx="920" cy="224" r="4"/><circle cx="944" cy="224" r="4"/>
+    <circle cx="776" cy="248" r="4"/><circle cx="800" cy="248" r="4"/><circle cx="824" cy="248" r="4"/><circle cx="848" cy="248" r="4"/><circle cx="872" cy="248" r="4"/><circle cx="896" cy="248" r="4"/><circle cx="920" cy="248" r="4"/><circle cx="944" cy="248" r="4"/>
+    <circle cx="776" cy="272" r="4"/><circle cx="800" cy="272" r="4"/><circle cx="824" cy="272" r="4"/><circle cx="848" cy="272" r="4"/><circle cx="872" cy="272" r="4"/><circle cx="896" cy="272" r="4"/><circle cx="920" cy="272" r="4"/><circle cx="944" cy="272" r="4"/>
+  </g>
+  <circle class="peg" cx="800" cy="176" r="7"/>
+  <circle class="peg" cx="920" cy="248" r="7"/>
+  <text class="name" x="40" y="224">Copperline</text>
+  <text class="tag" x="42" y="256">Engrave both sides, aligned on the pegs.</text>
+</svg>
+</body>
+</html>

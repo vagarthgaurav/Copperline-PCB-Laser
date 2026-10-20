@@ -1,0 +1,239 @@
+<!-- @dsCard group="Inputs" height=600 subtitle="Text, numeric with unit, select, switch, segmented, checkbox, slider" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Field</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  body { margin: 0; padding: var(--space-4); background: var(--surface-100); color: var(--ink); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--space-6) var(--space-6); }
+  .field { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+  .field > .label, .field > label.label { color: var(--ink-muted); text-transform: uppercase; }
+  .help { color: var(--ink-muted); margin: 0; }
+  .error-text { display: flex; align-items: flex-start; gap: var(--space-1); margin: 0; color: var(--danger); }
+  .error-text svg { flex: none; margin-top: -1px; }
+
+  /* Text-like controls */
+  .input, .select {
+    box-sizing: border-box; display: flex; align-items: center; width: 100%; min-height: 36px;
+    background: var(--surface-300); color: var(--ink);
+    border: 1px solid var(--border-strong); border-radius: var(--radius-md);
+  }
+  .input:hover, .select:hover { background: var(--surface-200); }
+  .input:has(input:focus-visible), .select:has(select:focus-visible) { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .input input, .select select {
+    flex: 1; min-width: 0; box-sizing: border-box; height: 34px; padding: 0 var(--space-3);
+    background: transparent; color: inherit; border: 0; outline: 0;
+    font-family: var(--font-sans); font-size: 14px; line-height: 20px;
+  }
+  .input input::placeholder { color: var(--ink-muted); opacity: 1; }
+  .input.num input { font-family: var(--font-mono); text-align: right; }
+  .unit { padding-right: var(--space-3); color: var(--ink-muted); font-family: var(--font-mono); font-size: 12.5px; user-select: none; }
+  .input.invalid { border-color: var(--danger); border-width: 2px; }
+  .input.disabled { opacity: 0.55; }
+  .input.disabled:hover { background: var(--surface-300); }
+
+  .select { position: relative; }
+  .select select { appearance: none; -webkit-appearance: none; padding-right: 36px; cursor: pointer; }
+  .select svg { position: absolute; right: var(--space-3); top: 10px; pointer-events: none; color: var(--ink-muted); }
+
+  /* Switch */
+  .switch-row { display: flex; align-items: center; gap: var(--space-3); min-height: 36px; }
+  .switch {
+    flex: none; position: relative; width: 44px; height: 26px; padding: 0; cursor: pointer;
+    background: var(--surface-sunken); border: 1px solid var(--border-strong); border-radius: var(--radius-pill);
+  }
+  .switch::after {
+    content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px;
+    border-radius: var(--radius-pill); background: var(--border-strong);
+  }
+  .switch[aria-checked="true"] { background: var(--accent); border-color: var(--accent); }
+  .switch[aria-checked="true"]::after { left: 21px; background: var(--on-accent); }
+  .switch:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .switch-text { color: var(--ink); }
+  .switch-state { color: var(--ink-muted); min-width: 24px; }
+
+  /* Segmented */
+  .segmented {
+    display: inline-flex; align-self: flex-start; gap: 2px; padding: 3px;
+    background: var(--surface-sunken); border: 1px solid var(--border-strong); border-radius: var(--radius-md);
+  }
+  .segmented [role="radio"] {
+    min-height: 28px; min-width: 72px; padding: 0 var(--space-4); cursor: pointer;
+    background: transparent; color: var(--ink-muted); border: 1px solid transparent; border-radius: 7px;
+    font-family: var(--font-sans); font-size: 14px; line-height: 20px; font-weight: 600;
+  }
+  .segmented [role="radio"]:hover { color: var(--ink); }
+  .segmented [role="radio"][aria-checked="true"] {
+    background: var(--surface-300); color: var(--ink); border-color: var(--border-strong); box-shadow: var(--shadow-sm);
+  }
+  .segmented [role="radio"]:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+
+  /* Checkbox */
+  .check { position: relative; display: inline-flex; align-items: center; gap: var(--space-2); min-height: 32px; cursor: pointer; }
+  .check input { position: absolute; left: 0; top: 6px; width: 20px; height: 20px; margin: 0; opacity: 0; cursor: pointer; }
+  .check .box {
+    flex: none; box-sizing: border-box; width: 20px; height: 20px; display: grid; place-items: center;
+    background: var(--surface-300); color: var(--on-accent);
+    border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  }
+  .check .box svg { visibility: hidden; }
+  .check input:checked + .box { background: var(--accent); border-color: var(--accent); }
+  .check input:checked + .box svg { visibility: visible; }
+  .check input:focus-visible + .box { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .check input:disabled ~ * { opacity: 0.55; }
+  .check input:disabled, .check:has(input:disabled) { cursor: not-allowed; }
+
+  /* Slider */
+  .slider-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .slider-head .label { color: var(--ink-muted); text-transform: uppercase; }
+  .slider-head output { font-family: var(--font-mono); font-weight: 500; font-size: 14px; color: var(--ink); }
+  .slider { position: relative; height: 28px; --p: 65%; }
+  .slider .track, .slider .fill { position: absolute; top: 10px; left: 0; height: 8px; border-radius: var(--radius-pill); box-sizing: border-box; }
+  .slider .track { right: 0; background: var(--surface-sunken); border: 1px solid var(--border-strong); }
+  .slider .fill { width: var(--p); background: var(--accent); }
+  .slider input[type="range"] {
+    position: absolute; inset: 0; width: 100%; height: 28px; margin: 0; background: transparent;
+    -webkit-appearance: none; appearance: none; cursor: pointer;
+  }
+  .slider input[type="range"]::-webkit-slider-runnable-track { height: 28px; background: transparent; }
+  .slider input[type="range"]::-moz-range-track { height: 28px; background: transparent; }
+  .slider input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 22px; height: 22px; margin-top: 3px; border-radius: var(--radius-pill);
+    background: var(--accent); border: 3px solid var(--surface-300); box-shadow: var(--shadow-sm), 0 0 0 1px var(--border-strong);
+  }
+  .slider input[type="range"]::-moz-range-thumb {
+    width: 16px; height: 16px; border-radius: var(--radius-pill);
+    background: var(--accent); border: 3px solid var(--surface-300); box-shadow: var(--shadow-sm), 0 0 0 1px var(--border-strong);
+  }
+  .slider input[type="range"]:focus-visible { outline: none; }
+  .slider input[type="range"]:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .slider input[type="range"]:focus-visible::-moz-range-thumb { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .slider-scale { display: flex; justify-content: space-between; color: var(--ink-muted); }
+</style>
+</head>
+<body class="body">
+<div class="grid">
+
+  <div class="field">
+    <label class="label" for="f-file">Job name</label>
+    <div class="input"><input id="f-file" type="text" value="board_v3-F_Cu" aria-describedby="f-file-help" autocomplete="off"></div>
+    <p class="help small" id="f-file-help">Used for the exported file: board_v3-F_Cu.nc</p>
+  </div>
+
+  <div class="field">
+    <label class="label" for="f-ox">Offset X</label>
+    <div class="input num"><input id="f-ox" type="text" inputmode="decimal" value="12.50" aria-describedby="f-ox-help"><span class="unit" aria-hidden="true">mm</span></div>
+    <p class="help small" id="f-ox-help">Applied to every G-code move.</p>
+  </div>
+
+  <div class="field">
+    <label class="label" for="f-feed">Feed rate</label>
+    <div class="input num"><input id="f-feed" type="text" inputmode="decimal" value="1200" aria-describedby="f-feed-help"><span class="unit" aria-hidden="true">mm/min</span></div>
+    <p class="help small" id="f-feed-help">Written as F1200 in the G-code.</p>
+  </div>
+
+  <div class="field">
+    <label class="label" for="f-oy">Offset Y (error)</label>
+    <div class="input num invalid"><input id="f-oy" type="text" inputmode="decimal" value="48.0x" aria-invalid="true" aria-describedby="f-oy-err"><span class="unit" aria-hidden="true">mm</span></div>
+    <p class="error-text small" id="f-oy-err">
+      <svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm-8-80V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,172Z"/></svg>
+      <span>Enter a number between 0 and 40 mm. The board would leave the peg grid.</span>
+    </p>
+  </div>
+
+  <div class="field">
+    <label class="label" for="f-port">Serial port</label>
+    <div class="select">
+      <select id="f-port">
+        <option>/dev/ttyUSB0 (115200 baud)</option>
+        <option>/dev/ttyACM0 (115200 baud)</option>
+        <option>No machine, simulate only</option>
+      </select>
+      <svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></svg>
+    </div>
+  </div>
+
+  <div class="field">
+    <span class="label" id="f-pw-l">Disabled field</span>
+    <div class="input num disabled"><input type="text" value="0.00" disabled aria-labelledby="f-pw-l"><span class="unit" aria-hidden="true">mm</span></div>
+    <p class="help small">Unlocks after a board is loaded.</p>
+  </div>
+
+  <div class="field">
+    <span class="label">Mirror</span>
+    <div class="switch-row">
+      <button class="switch" type="button" role="switch" aria-checked="true" aria-labelledby="sw-label" id="sw1"></button>
+      <span class="body switch-text" id="sw-label">Mirror for bottom side</span>
+      <span class="small switch-state" aria-hidden="true" id="sw1-state">On</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <span class="label" id="seg-l">Board side</span>
+    <div class="segmented" role="radiogroup" aria-labelledby="seg-l" id="seg">
+      <button type="button" role="radio" aria-checked="true" tabindex="0">Top</button>
+      <button type="button" role="radio" aria-checked="false" tabindex="-1">Bottom</button>
+    </div>
+  </div>
+
+  <div class="field">
+    <span class="label" id="cb-l">Options</span>
+    <div role="group" aria-labelledby="cb-l" style="display:flex; flex-direction:column;">
+      <label class="check"><input type="checkbox" checked><span class="box"><svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg></span><span class="body">Snap board to pegs</span></label>
+      <label class="check"><input type="checkbox"><span class="box"><svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg></span><span class="body">Include drill pass</span></label>
+      <label class="check"><input type="checkbox" disabled><span class="box"><svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg></span><span class="body">Engrave outline (no outline layer)</span></label>
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="slider-head">
+      <label class="label" for="pw">Laser power</label>
+      <output for="pw" id="pw-out">65%</output>
+    </div>
+    <div class="slider" id="pw-wrap">
+      <div class="track"></div><div class="fill"></div>
+      <input id="pw" type="range" min="0" max="100" step="1" value="65" aria-describedby="pw-help">
+    </div>
+    <div class="slider-scale small" aria-hidden="true"><span>0%</span><span>100%</span></div>
+    <p class="help small" id="pw-help">Higher power clears resist faster but widens traces.</p>
+  </div>
+
+</div>
+
+<script>
+  // Switch
+  var sw = document.getElementById('sw1');
+  sw.addEventListener('click', function () {
+    var on = sw.getAttribute('aria-checked') !== 'true';
+    sw.setAttribute('aria-checked', String(on));
+    document.getElementById('sw1-state').textContent = on ? 'On' : 'Off';
+  });
+  // Segmented radiogroup with roving tabindex
+  var seg = document.getElementById('seg');
+  var radios = Array.prototype.slice.call(seg.querySelectorAll('[role="radio"]'));
+  function select(i) {
+    radios.forEach(function (r, j) {
+      r.setAttribute('aria-checked', String(i === j));
+      r.tabIndex = i === j ? 0 : -1;
+    });
+    radios[i].focus();
+  }
+  radios.forEach(function (r, i) {
+    r.addEventListener('click', function () { select(i); });
+    r.addEventListener('keydown', function (e) {
+      var k = e.key;
+      if (k === 'ArrowRight' || k === 'ArrowDown') { e.preventDefault(); select((i + 1) % radios.length); }
+      if (k === 'ArrowLeft' || k === 'ArrowUp') { e.preventDefault(); select((i - 1 + radios.length) % radios.length); }
+    });
+  });
+  // Slider readout
+  var pw = document.getElementById('pw');
+  pw.addEventListener('input', function () {
+    document.getElementById('pw-out').textContent = pw.value + '%';
+    document.getElementById('pw-wrap').style.setProperty('--p', pw.value + '%');
+  });
+</script>
+</body>
+</html>

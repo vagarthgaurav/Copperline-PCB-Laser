@@ -1,0 +1,137 @@
+<!-- @dsCard group="Actions" height=500 subtitle="Primary, secondary, ghost and danger buttons in two sizes" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Button</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  body { margin: 0; padding: var(--space-4); background: var(--surface-100); color: var(--ink); }
+  .group { margin-bottom: var(--space-6); }
+  .group h2 { margin: 0 0 var(--space-2); color: var(--ink-muted); }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+  .cap { color: var(--ink-muted); }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--space-1);
+    box-sizing: border-box; min-height: 36px; padding: 0 var(--space-4);
+    border: 1px solid transparent; border-radius: var(--radius-md);
+    font-family: var(--font-sans); font-size: 14px; line-height: 20px; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+  }
+  .btn svg { flex: none; }
+  .btn:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .btn.sm { min-height: 32px; padding: 0 var(--space-3); }
+
+  .btn.primary { background: var(--accent); color: var(--on-accent); box-shadow: var(--shadow-sm); }
+  .btn.primary:hover, .btn.primary.is-hover { background: var(--accent-strong); }
+
+  .btn.secondary { background: var(--surface-300); color: var(--ink); border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
+  .btn.secondary:hover, .btn.secondary.is-hover { background: var(--surface-sunken); }
+
+  .btn.ghost { background: transparent; color: var(--accent-strong); }
+  .btn.ghost:hover, .btn.ghost.is-hover { background: var(--accent-soft); }
+
+  .btn.danger { background: var(--danger-soft); color: var(--danger); border-color: var(--danger); }
+  .btn.danger:hover, .btn.danger.is-hover { background: var(--surface-300); }
+
+  .btn.icon { padding: 0; width: 36px; }
+  .btn.icon.sm { width: 32px; }
+  .btn.icon.ghost { color: var(--ink); }
+  .btn.icon.ghost:hover, .btn.icon.ghost.is-hover { background: var(--surface-sunken); }
+
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+  .btn.primary:disabled { background: var(--surface-sunken); color: var(--ink-muted); border-color: var(--border-strong); opacity: 1; }
+  .btn.primary:disabled svg { opacity: 0.8; }
+</style>
+</head>
+<body class="body">
+
+<section class="group" aria-labelledby="g-variants">
+  <h2 id="g-variants" class="label">Variants (default / hover / focus)</h2>
+  <div class="row">
+    <button class="btn primary" type="button">Export G-code</button>
+    <button class="btn primary is-hover" type="button">Export G-code</button>
+    <button class="btn secondary" type="button">Flip to bottom</button>
+    <button class="btn secondary is-hover" type="button">Flip to bottom</button>
+    <button class="btn ghost" type="button">Open Gerber…</button>
+    <button class="btn ghost is-hover" type="button">Open Gerber…</button>
+  </div>
+  <div class="row" style="margin-top: var(--space-2)">
+    <button class="btn danger" type="button">Emergency stop</button>
+    <button class="btn danger is-hover" type="button">Emergency stop</button>
+    <button class="btn secondary" type="button" id="focus-demo">Tab to me for the focus ring</button>
+  </div>
+</section>
+
+<section class="group" aria-labelledby="g-sizes">
+  <h2 id="g-sizes" class="label">Sizes</h2>
+  <div class="row">
+    <button class="btn primary" type="button">Connect</button>
+    <span class="small cap">md, 36px</span>
+    <button class="btn primary sm" type="button">Connect</button>
+    <span class="small cap">sm, 32px</span>
+    <button class="btn secondary" type="button">Flip to bottom</button>
+    <button class="btn secondary sm" type="button">Flip to bottom</button>
+  </div>
+</section>
+
+<section class="group" aria-labelledby="g-icons">
+  <h2 id="g-icons" class="label">With icon</h2>
+  <div class="row">
+    <button class="btn primary" type="button">
+      <svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></svg>
+      Export G-code
+    </button>
+    <button class="btn secondary" type="button">
+      <svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M107.18,24.33a15.86,15.86,0,0,0-17.92,9.45l-.06.14-64,159.93A16,16,0,0,0,40,216h64a16,16,0,0,0,16-16V40A15.85,15.85,0,0,0,107.18,24.33ZM104,200H40l.06-.15L104,40Zm126.77-6.15-64-159.93-.06-.14A16,16,0,0,0,136,40V200a16,16,0,0,0,16,16h64a16,16,0,0,0,14.78-22.15ZM152,200V40l63.93,159.84.06.15Z"/></svg>
+      Flip to bottom
+    </button>
+    <button class="btn secondary" type="button">
+      <svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M245,110.64A16,16,0,0,0,232,104H216V88a16,16,0,0,0-16-16H130.67L102.94,51.2a16.14,16.14,0,0,0-9.6-3.2H40A16,16,0,0,0,24,64V208h0a8,8,0,0,0,8,8H211.1a8,8,0,0,0,7.59-5.47l28.49-85.47A16.05,16.05,0,0,0,245,110.64ZM93.34,64,123.2,86.4A8,8,0,0,0,128,88h72v16H69.77a16,16,0,0,0-15.18,10.94L40,158.7V64Zm112,136H43.1l26.67-80H232Z"/></svg>
+      Open Gerber…
+    </button>
+    <button class="btn secondary sm" type="button">
+      <svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M149.66,138.34a8,8,0,0,0-11.32,0L120,156.69,99.31,136l18.35-18.34a8,8,0,0,0-11.32-11.32L88,124.69,69.66,106.34a8,8,0,0,0-11.32,11.32L64.69,124,41.37,147.31a32,32,0,0,0,0,45.26l5.38,5.37-28.41,28.4a8,8,0,0,0,11.32,11.32l28.4-28.41,5.37,5.38a32,32,0,0,0,45.26,0L132,191.31l6.34,6.35a8,8,0,0,0,11.32-11.32L131.31,168l18.35-18.34A8,8,0,0,0,149.66,138.34Zm-52.29,65a16,16,0,0,1-22.62,0L52.69,181.25a16,16,0,0,1,0-22.62L76,135.31,120.69,180Zm140.29-185a8,8,0,0,0-11.32,0l-28.4,28.41-5.37-5.38a32.05,32.05,0,0,0-45.26,0L124,64.69l-6.34-6.35a8,8,0,0,0-11.32,11.32l80,80a8,8,0,0,0,11.32-11.32L191.31,132l23.32-23.31a32,32,0,0,0,0-45.26l-5.38-5.37,28.41-28.4A8,8,0,0,0,237.66,18.34Zm-34.35,79L180,120.69,135.31,76l23.32-23.31a16,16,0,0,1,22.62,0l22.06,22A16,16,0,0,1,203.31,97.37Z"/></svg>
+      Connect
+    </button>
+    <button class="btn danger" type="button">
+      <svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M120,136V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0ZM232,91.55v72.9a15.86,15.86,0,0,1-4.69,11.31l-51.55,51.55A15.86,15.86,0,0,1,164.45,232H91.55a15.86,15.86,0,0,1-11.31-4.69L28.69,175.76A15.86,15.86,0,0,1,24,164.45V91.55a15.86,15.86,0,0,1,4.69-11.31L80.24,28.69A15.86,15.86,0,0,1,91.55,24h72.9a15.86,15.86,0,0,1,11.31,4.69l51.55,51.55A15.86,15.86,0,0,1,232,91.55Zm-16,0L164.45,40H91.55L40,91.55v72.9L91.55,216h72.9L216,164.45ZM128,160a12,12,0,1,0,12,12A12,12,0,0,0,128,160Z"/></svg>
+      Emergency stop
+    </button>
+  </div>
+</section>
+
+<section class="group" aria-labelledby="g-icononly">
+  <h2 id="g-icononly" class="label">Icon-only (aria-label required)</h2>
+  <div class="row">
+    <button class="btn secondary icon" type="button" aria-label="Center board on pegs">
+      <svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M232,120h-8.34A96.14,96.14,0,0,0,136,32.34V24a8,8,0,0,0-16,0v8.34A96.14,96.14,0,0,0,32.34,120H24a8,8,0,0,0,0,16h8.34A96.14,96.14,0,0,0,120,223.66V232a8,8,0,0,0,16,0v-8.34A96.14,96.14,0,0,0,223.66,136H232a8,8,0,0,0,0-16Zm-96,87.6V200a8,8,0,0,0-16,0v7.6A80.15,80.15,0,0,1,48.4,136H56a8,8,0,0,0,0-16H48.4A80.15,80.15,0,0,1,120,48.4V56a8,8,0,0,0,16,0V48.4A80.15,80.15,0,0,1,207.6,120H200a8,8,0,0,0,0,16h7.6A80.15,80.15,0,0,1,136,207.6ZM128,88a40,40,0,1,0,40,40A40,40,0,0,0,128,88Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,152Z"/></svg>
+    </button>
+    <button class="btn ghost icon" type="button" aria-label="Flip board to bottom side">
+      <svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M107.18,24.33a15.86,15.86,0,0,0-17.92,9.45l-.06.14-64,159.93A16,16,0,0,0,40,216h64a16,16,0,0,0,16-16V40A15.85,15.85,0,0,0,107.18,24.33ZM104,200H40l.06-.15L104,40Zm126.77-6.15-64-159.93-.06-.14A16,16,0,0,0,136,40V200a16,16,0,0,0,16,16h64a16,16,0,0,0,14.78-22.15ZM152,200V40l63.93,159.84.06.15Z"/></svg>
+    </button>
+    <button class="btn ghost icon is-hover" type="button" aria-label="Remove layer">
+      <svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>
+    </button>
+    <button class="btn secondary icon sm" type="button" aria-label="Center board on pegs">
+      <svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M232,120h-8.34A96.14,96.14,0,0,0,136,32.34V24a8,8,0,0,0-16,0v8.34A96.14,96.14,0,0,0,32.34,120H24a8,8,0,0,0,0,16h8.34A96.14,96.14,0,0,0,120,223.66V232a8,8,0,0,0,16,0v-8.34A96.14,96.14,0,0,0,223.66,136H232a8,8,0,0,0,0-16Zm-96,87.6V200a8,8,0,0,0-16,0v7.6A80.15,80.15,0,0,1,48.4,136H56a8,8,0,0,0,0-16H48.4A80.15,80.15,0,0,1,120,48.4V56a8,8,0,0,0,16,0V48.4A80.15,80.15,0,0,1,207.6,120H200a8,8,0,0,0,0,16h7.6A80.15,80.15,0,0,1,136,207.6ZM128,88a40,40,0,1,0,40,40A40,40,0,0,0,128,88Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,152Z"/></svg>
+    </button>
+  </div>
+</section>
+
+<section class="group" aria-labelledby="g-disabled" style="margin-bottom: 0">
+  <h2 id="g-disabled" class="label">Disabled</h2>
+  <div class="row">
+    <button class="btn primary" type="button" disabled>Export G-code</button>
+    <button class="btn secondary" type="button" disabled>Flip to bottom</button>
+    <button class="btn ghost" type="button" disabled>Open Gerber…</button>
+    <button class="btn danger" type="button" disabled>Emergency stop</button>
+    <button class="btn secondary icon" type="button" disabled aria-label="Center board on pegs">
+      <svg width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M232,120h-8.34A96.14,96.14,0,0,0,136,32.34V24a8,8,0,0,0-16,0v8.34A96.14,96.14,0,0,0,32.34,120H24a8,8,0,0,0,0,16h8.34A96.14,96.14,0,0,0,120,223.66V232a8,8,0,0,0,16,0v-8.34A96.14,96.14,0,0,0,223.66,136H232a8,8,0,0,0,0-16Zm-96,87.6V200a8,8,0,0,0-16,0v7.6A80.15,80.15,0,0,1,48.4,136H56a8,8,0,0,0,0-16H48.4A80.15,80.15,0,0,1,120,48.4V56a8,8,0,0,0,16,0V48.4A80.15,80.15,0,0,1,207.6,120H200a8,8,0,0,0,0,16h7.6A80.15,80.15,0,0,1,136,207.6ZM128,88a40,40,0,1,0,40,40A40,40,0,0,0,128,88Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,152Z"/></svg>
+    </button>
+  </div>
+</section>
+
+</body>
+</html>

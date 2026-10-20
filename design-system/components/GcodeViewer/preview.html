@@ -1,0 +1,78 @@
+<!-- @dsCard group="Viewport" height=540 subtitle="Read-only G-code list with current line marker and progress" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GcodeViewer</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  body { margin:0; padding:var(--space-4); background:var(--surface-100); color:var(--ink); font-family:var(--font-sans); }
+  .wrap { display:flex; flex-wrap:wrap; gap:var(--space-6); align-items:flex-start; }
+  .panel { width:100%; max-width:560px; background:var(--surface-200); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); overflow:hidden; }
+  header { display:flex; align-items:center; justify-content:space-between; gap:var(--space-3); padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--border); }
+  header h2 { margin:0; }
+  .btn { display:inline-flex; align-items:center; gap:var(--space-1); min-height:36px; padding:0 var(--space-3); border-radius:var(--radius-md); border:1px solid var(--border-strong); background:transparent; color:var(--ink); cursor:pointer; }
+  .btn:hover { background:var(--surface-300); }
+  .btn:focus-visible { outline:2px solid var(--ring); outline-offset:2px; }
+  .list { margin:0; padding:0; list-style:none; max-height:340px; overflow:auto; background:var(--surface-200); }
+  .list:focus-visible { outline:2px solid var(--ring); outline-offset:-2px; }
+  .row { display:grid; grid-template-columns:64px 1fr; min-height:20px; }
+  .num { display:flex; align-items:center; justify-content:flex-end; gap:var(--space-1); padding:0 var(--space-2); background:var(--surface-sunken); color:var(--ink-muted); font:400 12.5px/20px var(--font-mono); font-variant-numeric:tabular-nums; border-right:1px solid var(--border); }
+  .mk { display:inline-flex; width:14px; height:14px; }
+  .txt { padding:0 var(--space-3); white-space:pre; color:var(--ink); }
+  .g { color:var(--accent-strong); } .c { color:var(--ink-muted); } .p { color:var(--ink); }
+  .done .txt, .done .g, .done .p { color:var(--ink-muted); }
+  .done .num { color:var(--mask); }
+  .cur .num, .cur .txt { background:var(--accent-soft); }
+  .cur .num { color:var(--ink); font-weight:500; border-right-color:var(--accent-strong); }
+  .cur .caret { color:var(--accent-strong); }
+  .cur .txt { font-weight:500; }
+  .gap .num { color:var(--ink-muted); }
+  .gap .txt { color:var(--ink-muted); font-style:normal; line-height:20px; background:var(--surface-sunken); opacity:1; }
+  footer { display:flex; align-items:center; gap:var(--space-4); padding:var(--space-3) var(--space-4); border-top:1px solid var(--border); }
+  footer .meta { white-space:nowrap; color:var(--ink); }
+  .bar { flex:1; height:8px; background:var(--surface-sunken); border:1px solid var(--border-strong); border-radius:var(--radius-pill); overflow:hidden; box-sizing:content-box; }
+  .bar > div { height:100%; background:var(--accent); width:32%; }
+  .key { display:flex; gap:var(--space-4); flex-wrap:wrap; color:var(--ink-muted); margin:var(--space-3) 0 0; padding:0; list-style:none; }
+  .key li { display:flex; align-items:center; gap:var(--space-2); }
+  .key .n { font:500 12.5px/20px var(--font-mono); padding:0 var(--space-2); background:var(--surface-sunken); border-radius:var(--radius-sm); border:1px solid var(--border); }
+  .key .n.d { color:var(--mask); } .key .n.c { background:var(--accent-soft); color:var(--ink); }
+</style>
+</head>
+<body class="body">
+<div class="wrap">
+  <section class="panel" aria-labelledby="gc-title">
+    <header>
+      <h2 class="heading" id="gc-title">G-code &middot; 1,284 lines</h2>
+      <button type="button" class="btn body-strong"><svg class="ic" width="20" height="20" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></svg>Export</button>
+    </header>
+    <ol class="list" tabindex="0" aria-label="G-code lines, current line 412">
+        <li class="row done"><span class="num"><span class="mk"></span>1</span><span class="txt code"><span class="g">G21</span> <span class="c">; units: millimetres</span></span></li>
+        <li class="row done"><span class="num"><span class="mk"></span>2</span><span class="txt code"><span class="g">G90</span> <span class="c">; absolute positioning</span></span></li>
+        <li class="row done"><span class="num"><span class="mk"></span>3</span><span class="txt code"><span class="g">M5</span> <span class="c">; laser off</span></span></li>
+        <li class="row done"><span class="num"><span class="mk"></span>4</span><span class="txt code"><span class="g">G0</span> <span class="p">X12.500</span> <span class="p">Y6.000</span> <span class="c">; board origin plus offset</span></span></li>
+        <li class="row done"><span class="num"><span class="mk"></span>5</span><span class="txt code"><span class="g">G1</span> <span class="p">F1200</span> <span class="c">; engraving feed rate</span></span></li>
+        <li class="row gap"><span class="num" aria-hidden="true">&#8943;</span><span class="txt small">402 lines not shown</span></li>
+        <li class="row done"><span class="num"><span class="mk"></span>407</span><span class="txt code"><span class="g">G0</span> <span class="p">X31.400</span> <span class="p">Y14.250</span></span></li>
+        <li class="row done"><span class="num"><span class="mk"></span>408</span><span class="txt code"><span class="g">M3</span> <span class="p">S650</span> <span class="c">; laser on, 65% power</span></span></li>
+        <li class="row done"><span class="num"><span class="mk"></span>409</span><span class="txt code"><span class="g">G1</span> <span class="p">X31.400</span> <span class="p">Y18.000</span> <span class="p">F1200</span></span></li>
+        <li class="row done"><span class="num"><span class="mk"></span>410</span><span class="txt code"><span class="g">G1</span> <span class="p">X36.900</span> <span class="p">Y18.000</span></span></li>
+        <li class="row done"><span class="num"><span class="mk"></span>411</span><span class="txt code"><span class="g">G1</span> <span class="p">X42.500</span> <span class="p">Y18.000</span></span></li>
+        <li class="row cur" aria-current="step"><span class="num"><span class="mk"><svg class="caret" width="14" height="14" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M181.66,133.66l-80,80A8,8,0,0,1,88,208V48a8,8,0,0,1,13.66-5.66l80,80A8,8,0,0,1,181.66,133.66Z"/></svg></span>412</span><span class="txt code"><span class="g">G1</span> <span class="p">X48.250</span> <span class="p">Y18.000</span> <span class="p">F1200</span> <span class="c">; trace T3</span></span></li>
+        <li class="row next"><span class="num"><span class="mk"></span>413</span><span class="txt code"><span class="g">G1</span> <span class="p">X48.250</span> <span class="p">Y12.400</span></span></li>
+        <li class="row next"><span class="num"><span class="mk"></span>414</span><span class="txt code"><span class="g">M5</span> <span class="c">; laser off</span></span></li>
+        <li class="row next"><span class="num"><span class="mk"></span>415</span><span class="txt code"><span class="g">G0</span> <span class="p">X54.100</span> <span class="p">Y9.800</span> <span class="c">; jump to next pad</span></span></li>
+    </ol>
+    <footer>
+      <span class="meta small">Line 412 of 1,284 &middot; 32%</span>
+      <div class="bar" role="progressbar" aria-label="G-code progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="32"><div></div></div>
+    </footer>
+  </section>
+</div>
+<ul class="key small" aria-label="Line states">
+  <li><span class="n d">407</span>Done: muted text, green number</li>
+  <li><span class="n c">412</span>Current: highlighted row with marker</li>
+  <li><span class="n">413</span>Next: full-contrast text</li>
+</ul>
+</body>
+</html>
