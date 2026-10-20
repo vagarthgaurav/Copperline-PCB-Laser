@@ -1,0 +1,197 @@
+:host {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 10px;
+  box-sizing: border-box;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-200);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.tbtn,
+.play {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  padding: 0;
+  cursor: pointer;
+}
+.tbtn:focus-visible,
+.play:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.tbtn {
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+}
+.tbtn:hover:not(:disabled) {
+  background: var(--surface-sunken);
+}
+
+.play {
+  width: 44px;
+  height: 44px;
+  background: var(--accent);
+  border: 0;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
+  color: var(--on-accent);
+}
+.play:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+
+.tbtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.play:disabled {
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-strong);
+  box-shadow: none;
+  color: var(--ink-muted);
+  cursor: not-allowed;
+}
+
+/* Scrubber: a separate fill bar over a sunken track; the native input sits on top, invisible. */
+.range {
+  --thumb: 18px;
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 24px;
+}
+.track,
+.fill {
+  position: absolute;
+  top: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+}
+.track {
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-strong);
+}
+.fill {
+  left: 0;
+  width: calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--p, 0));
+  background: var(--accent);
+}
+.thumb {
+  position: absolute;
+  top: 3px;
+  left: calc((100% - var(--thumb)) * var(--p, 0));
+  box-sizing: border-box;
+  width: var(--thumb);
+  height: var(--thumb);
+  background: var(--surface-300);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
+}
+.range input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.range input:disabled {
+  cursor: not-allowed;
+}
+.range:has(input:focus-visible) .thumb {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.range:has(input:disabled) {
+  opacity: 0.5;
+}
+
+.time {
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 20px;
+  line-height: 26px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.time span {
+  color: var(--ink-muted);
+  font-size: 14px;
+}
+
+/* Speed: native radios inside labels; the checked one is filled, bordered and bold. */
+.seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+}
+.seg-item {
+  position: relative;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  min-width: 36px;
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font: 400 14px/20px var(--font-sans);
+  cursor: pointer;
+}
+.seg-item input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+.seg-item:has(input:checked) {
+  background: var(--accent-soft);
+  border-color: var(--border-strong);
+  font-weight: 600;
+}
+.seg-item:has(input:focus-visible) {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.seg-item:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.note {
+  margin: 0;
+  color: var(--ink-muted);
+}

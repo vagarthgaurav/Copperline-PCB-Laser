@@ -1,0 +1,78 @@
+<div class="row">
+  <div class="buttons">
+    <button
+      type="button"
+      class="tbtn"
+      aria-label="Restart"
+      [disabled]="!hasJob() || atStart()"
+      (click)="simulation.restart()"
+    >
+      <app-icon name="arrow-counter-clockwise" />
+    </button>
+    <button
+      type="button"
+      class="tbtn"
+      aria-label="Step back"
+      [disabled]="!hasJob() || atStart()"
+      (click)="simulation.stepBack()"
+    >
+      <app-icon name="skip-back" />
+    </button>
+    <button
+      type="button"
+      class="play"
+      [attr.aria-label]="simulation.playing() ? 'Pause' : 'Play'"
+      [attr.aria-pressed]="simulation.playing()"
+      [disabled]="!hasJob()"
+      (click)="simulation.togglePlaying()"
+    >
+      <app-icon [name]="simulation.playing() ? 'pause' : 'play'" weight="fill" />
+    </button>
+    <button
+      type="button"
+      class="tbtn"
+      aria-label="Step forward"
+      [disabled]="!hasJob()"
+      (click)="simulation.stepForward()"
+    >
+      <app-icon name="skip-forward" />
+    </button>
+  </div>
+
+  <div class="range" [style.--p]="simulation.progress()">
+    <span class="track"></span>
+    <span class="fill"></span>
+    <span class="thumb"></span>
+    <input
+      type="range"
+      min="0"
+      step="1"
+      aria-label="Simulation position"
+      [max]="sliderMax()"
+      [value]="sliderValue()"
+      [attr.aria-valuetext]="valueText()"
+      [disabled]="!hasJob()"
+      (input)="onSeek($event)"
+    />
+  </div>
+
+  <div class="time" aria-live="off">{{ elapsed() }} <span>/ {{ total() }}</span></div>
+
+  <div class="seg" role="radiogroup" aria-label="Playback speed">
+    @for (speed of speeds; track speed) {
+      <label class="seg-item">
+        <input
+          type="radio"
+          [name]="speedGroupName"
+          [value]="speed"
+          [checked]="simulation.speed() === speed"
+          [disabled]="!hasJob()"
+          (change)="simulation.setSpeed(speed)"
+        />
+        <span>{{ speed }}×</span>
+      </label>
+    }
+  </div>
+</div>
+
+<p class="note small">Simulating — nothing is sent to the machine</p>
