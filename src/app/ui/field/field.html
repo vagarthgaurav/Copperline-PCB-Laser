@@ -1,0 +1,155 @@
+<div class="field">
+  @switch (kind()) {
+    @case ('text') {
+      <label class="label" [for]="controlId">{{ label() }}</label>
+      <div class="input" [class.invalid]="error()" [class.disabled]="disabled()">
+        <input
+          type="text"
+          autocomplete="off"
+          [id]="controlId"
+          [value]="textValue()"
+          [placeholder]="placeholder()"
+          [disabled]="disabled()"
+          [attr.aria-invalid]="error() ? 'true' : null"
+          [attr.aria-describedby]="describedBy()"
+          (input)="onText($event)"
+        />
+      </div>
+    }
+    @case ('number') {
+      <label class="label" [for]="controlId">
+        {{ label() }}
+        @if (unit()) {
+          <span class="sr-only">, unit {{ unit() }}</span>
+        }
+      </label>
+      <div class="input num" [class.invalid]="error()" [class.disabled]="disabled()">
+        <input
+          type="text"
+          inputmode="decimal"
+          autocomplete="off"
+          [id]="controlId"
+          [value]="numberText()"
+          [placeholder]="placeholder()"
+          [disabled]="disabled()"
+          [attr.aria-invalid]="error() ? 'true' : null"
+          [attr.aria-describedby]="describedBy()"
+          (input)="onNumber($event)"
+          (keydown)="onNumberKey($event)"
+        />
+        @if (unit()) {
+          <span class="unit" aria-hidden="true">{{ unit() }}</span>
+        }
+      </div>
+    }
+    @case ('select') {
+      <label class="label" [for]="controlId">{{ label() }}</label>
+      <div class="select" [class.invalid]="error()" [class.disabled]="disabled()">
+        <select
+          [id]="controlId"
+          [disabled]="disabled()"
+          [attr.aria-invalid]="error() ? 'true' : null"
+          [attr.aria-describedby]="describedBy()"
+          (change)="onSelect($event)"
+        >
+          @for (option of options(); track option.value) {
+            <option [value]="option.value" [selected]="option.value === value()">
+              {{ option.label }}
+            </option>
+          }
+        </select>
+        <app-icon name="caret-down" [size]="16" />
+      </div>
+    }
+    @case ('switch') {
+      <div class="switch-row" [class.disabled]="disabled()">
+        <button
+          type="button"
+          role="switch"
+          class="switch"
+          [id]="controlId"
+          [disabled]="disabled()"
+          [attr.aria-checked]="checked()"
+          [attr.aria-labelledby]="labelId"
+          [attr.aria-describedby]="describedBy()"
+          (click)="toggle()"
+        ></button>
+        <span class="body" [id]="labelId">{{ label() }}</span>
+        <span class="small switch-state" aria-hidden="true">{{ checked() ? 'On' : 'Off' }}</span>
+      </div>
+    }
+    @case ('segmented') {
+      <span class="label" [id]="labelId">{{ label() }}</span>
+      <div
+        class="segmented"
+        role="radiogroup"
+        [attr.aria-labelledby]="labelId"
+        [attr.aria-describedby]="describedBy()"
+      >
+        @for (option of options(); track option.value; let i = $index) {
+          <button
+            #radio
+            type="button"
+            role="radio"
+            [disabled]="disabled()"
+            [attr.aria-checked]="i === selectedIndex()"
+            [attr.tabindex]="i === selectedIndex() || (selectedIndex() < 0 && i === 0) ? 0 : -1"
+            (click)="select(i)"
+            (keydown)="onSegmentKey($event, i)"
+          >
+            {{ option.label }}
+          </button>
+        }
+      </div>
+    }
+    @case ('checkbox') {
+      <label class="check" [class.disabled]="disabled()">
+        <input
+          type="checkbox"
+          [id]="controlId"
+          [checked]="checked()"
+          [disabled]="disabled()"
+          [attr.aria-describedby]="describedBy()"
+          (change)="onCheckbox($event)"
+        />
+        <span class="box"><app-icon name="check" [size]="16" /></span>
+        <span class="body">{{ label() }}</span>
+      </label>
+    }
+    @case ('slider') {
+      <div class="slider-head">
+        <label class="label" [for]="controlId">{{ label() }}</label>
+        <output [attr.for]="controlId">{{ formatWithUnit(sliderValue()) }}</output>
+      </div>
+      <div class="slider" [class.disabled]="disabled()" [style.--p]="sliderPercent() + '%'">
+        <div class="track"></div>
+        <div class="fill"></div>
+        <input
+          type="range"
+          [id]="controlId"
+          [min]="sliderMin()"
+          [max]="sliderMax()"
+          [step]="step() ?? 1"
+          [value]="sliderValue()"
+          [disabled]="disabled()"
+          [attr.aria-valuetext]="formatWithUnit(sliderValue())"
+          [attr.aria-describedby]="describedBy()"
+          (input)="onSlider($event)"
+        />
+      </div>
+      <div class="slider-scale small" aria-hidden="true">
+        <span>{{ formatWithUnit(sliderMin()) }}</span>
+        <span>{{ formatWithUnit(sliderMax()) }}</span>
+      </div>
+    }
+  }
+  @if (help(); as help) {
+    <p class="help small" [id]="helpId">{{ help }}</p>
+  }
+  @if (error(); as error) {
+    <p class="error-text small" [id]="errorId">
+      <app-icon name="warning-circle" [size]="16" />
+      <span>{{ error }}</span>
+    </p>
+  }
+</div>

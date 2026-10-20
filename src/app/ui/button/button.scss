@@ -1,0 +1,92 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  box-sizing: border-box;
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  background: transparent;
+  color: var(--ink);
+}
+
+:host(:focus-visible) {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+:host([data-size='sm']) {
+  min-height: 32px;
+  padding: 0 var(--space-3);
+}
+
+:host([data-variant='primary']) {
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: var(--shadow-sm);
+}
+:host([data-variant='primary']:hover:not(:disabled)) {
+  background: var(--accent-strong);
+}
+
+:host([data-variant='secondary']) {
+  background: var(--surface-300);
+  color: var(--ink);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
+}
+:host([data-variant='secondary']:hover:not(:disabled)) {
+  background: var(--surface-sunken);
+}
+
+:host([data-variant='ghost']) {
+  background: transparent;
+  color: var(--accent-strong);
+}
+:host([data-variant='ghost']:hover:not(:disabled)) {
+  background: var(--accent-soft);
+}
+
+:host([data-variant='danger']) {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+:host([data-variant='danger']:hover:not(:disabled)) {
+  background: var(--surface-300);
+}
+
+/* Icon-only buttons are square: 36px, or 32px when small. Ghost ones use ink. */
+:host(.icon-only) {
+  padding: 0;
+  width: 36px;
+}
+:host(.icon-only[data-size='sm']) {
+  width: 32px;
+}
+:host(.icon-only[data-variant='ghost']) {
+  color: var(--ink);
+}
+:host(.icon-only[data-variant='ghost']:hover:not(:disabled)) {
+  background: var(--surface-sunken);
+}
+
+:host(:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+:host([data-variant='primary']:disabled) {
+  background: var(--surface-sunken);
+  color: var(--ink-muted);
+  border-color: var(--border-strong);
+  opacity: 1;
+}
