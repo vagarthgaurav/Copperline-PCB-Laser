@@ -1,6 +1,7 @@
 <header class="titlebar">
   <app-title-bar
     [tab]="workspace.tab()"
+    [status]="machine.status()"
     (tabChange)="onTabChange($event)"
     [exportDisabled]="exportDisabled()"
     (exportRequested)="onExportRequested()"

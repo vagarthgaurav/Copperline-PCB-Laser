@@ -3,6 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { App } from './app';
 import { routes } from './app.routes';
+import { GcodeService } from './core/gcode.service';
+import { MachineService } from './core/machine.service';
 import { WindowService } from './core/window.service';
 
 describe('App', () => {
@@ -77,5 +79,27 @@ describe('App', () => {
       b.textContent?.includes('Export G-code'),
     );
     expect(exportButton?.disabled).toBe(true);
+  });
+
+  it('enables Export G-code once there are G-code lines and exports on click', async () => {
+    const { el, fixture } = await setup();
+    const gcode = TestBed.inject(GcodeService);
+    const exportToFile = vi.spyOn(gcode, 'exportToFile').mockImplementation(() => {});
+    gcode.setLines(['G21']);
+    await fixture.whenStable();
+    const exportButton = Array.from(el.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Export G-code'),
+    )!;
+    expect(exportButton.disabled).toBe(false);
+    exportButton.click();
+    expect(exportToFile).toHaveBeenCalledOnce();
+  });
+
+  it('shows the machine status in the title bar', async () => {
+    const { el, fixture } = await setup();
+    expect(el.querySelector('app-status-chip')?.textContent).toContain('Disconnected');
+    TestBed.inject(MachineService).applyState({ connection: 'connected' });
+    await fixture.whenStable();
+    expect(el.querySelector('app-status-chip')?.textContent).toContain('Connected');
   });
 });
