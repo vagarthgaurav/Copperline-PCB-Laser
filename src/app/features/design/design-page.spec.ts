@@ -21,9 +21,16 @@ describe('DesignPage', () => {
     const headings = (panel: Element) => Array.from(panel.querySelectorAll('h2')).map((h) => h.textContent);
     expect(headings(left)).toEqual(["Project","Layers","Placement","Engraving"]);
     expect(headings(right)).toEqual(["Placement","G-code"]);
-    el.querySelectorAll('section').forEach((section) => {
+    el.querySelectorAll('app-panel-section section').forEach((section) => {
       expect(section.querySelector('app-empty-note')?.textContent?.trim()).toBeTruthy();
     });
+  });
+
+  it('shows the empty G-code viewer filling the right panel', async () => {
+    const el = await setup();
+    const viewer = el.querySelector('app-panel:last-of-type app-gcode-viewer')!;
+    expect(viewer.textContent).toContain('No G-code yet. Load a Gerber to preview it.');
+    expect(viewer.querySelector('ol')).toBeNull();
   });
 
   it('labels the panels and shows the viewport placeholder in main', async () => {
@@ -35,7 +42,8 @@ describe('DesignPage', () => {
 
   it('shows no digits as placeholder data', async () => {
     const el = await setup();
-    expect((el.textContent ?? '').replace('3D', '')).not.toMatch(/\d/);
+    const text = Array.from(el.querySelectorAll('app-panel-section, main')).map((e) => e.textContent).join(' ');
+    expect(text.replace('3D', '')).not.toMatch(/\d/);
   });
 
   it('puts the project section and the layer list in the Project and Layers sections', async () => {
@@ -54,6 +62,9 @@ describe('DesignPage', () => {
       await vi.waitFor(() => expect(el.querySelector('.filecard')).toBeTruthy());
       expect(el.querySelector('.filecard')?.textContent).toContain('4 layers · 80 × 55 mm');
       expect(el.querySelectorAll('button.layer').length).toBe(4);
+      expect(el.querySelectorAll('app-placement-section app-field').length).toBe(4);
+      expect(el.querySelectorAll('app-engraving-section app-field').length).toBe(2);
+      expect(el.querySelectorAll('app-placement-readout app-tile').length).toBe(2);
     } finally {
       delete (window as unknown as Record<string, unknown>)['__TAURI_INTERNALS__'];
     }
