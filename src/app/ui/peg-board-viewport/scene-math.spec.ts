@@ -24,6 +24,7 @@ import {
   countDone,
   extractFeed,
   fitCamera,
+  grabBounds,
   holeGrid,
   pointInBoard,
   rayPlaneZ,
@@ -111,6 +112,22 @@ describe('pointInBoard', () => {
     expect(pointInBoard(25, 90, board, m)).toBe(true);
     expect(pointInBoard(75, 25, board, m)).toBe(false);
     expect(pointInBoard(-1, 50, board, m)).toBe(false);
+  });
+});
+
+describe('grabBounds', () => {
+  it('is the bounds without a blank', () => {
+    expect(grabBounds(board, null)).toBe(board);
+  });
+
+  it('widens to the blank, and the widened box is hit through the same transform', () => {
+    const blank = { minX: 5, minY: 15, maxX: 120, maxY: 75 };
+    expect(grabBounds(board, blank)).toEqual(blank);
+    const m = boardTransform(board, 0, 0, 0, false);
+    // Left of the cut outline but inside the blank: only the widened box catches it.
+    const edge = applyAffine(m, 7, 40);
+    expect(pointInBoard(edge.x, edge.y, board, m)).toBe(false);
+    expect(pointInBoard(edge.x, edge.y, grabBounds(board, blank), m)).toBe(true);
   });
 });
 

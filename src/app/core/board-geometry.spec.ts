@@ -47,13 +47,25 @@ describe('buildBoardGeometry', () => {
           id: 't',
           kind: 'topCopper',
           label: 'Top copper',
-          primitives: [{ type: 'flash', at: [1, 1], shape: { kind: 'rect', width: 2, height: 2, rotation: 0 } }],
+          primitives: [
+            {
+              type: 'flash',
+              at: [1, 1],
+              shape: { kind: 'rect', width: 2, height: 2, rotation: 0 },
+            },
+          ],
         }),
         layer({
           id: 'b',
           kind: 'bottomCopper',
           label: 'Bottom copper',
-          primitives: [{ type: 'flash', at: [1, 1], shape: { kind: 'rect', width: 4, height: 4, rotation: 0 } }],
+          primitives: [
+            {
+              type: 'flash',
+              at: [1, 1],
+              shape: { kind: 'rect', width: 4, height: 4, rotation: 0 },
+            },
+          ],
         }),
       ],
     };
@@ -97,7 +109,9 @@ describe('buildBoardGeometry', () => {
   describe('flash', () => {
     it('triangulates a circle as a 24-gon', () => {
       const geo = buildBoardGeometry(
-        projectWith('topCopper', [{ type: 'flash', at: [5, 5], shape: { kind: 'circle', diameter: 2 } }]),
+        projectWith('topCopper', [
+          { type: 'flash', at: [5, 5], shape: { kind: 'circle', diameter: 2 } },
+        ]),
         'top',
       )!;
       expect(geo.copper.length).toBe(24 * 6);
@@ -107,7 +121,11 @@ describe('buildBoardGeometry', () => {
     it('rotates a rect about its centre', () => {
       const geo = buildBoardGeometry(
         projectWith('topCopper', [
-          { type: 'flash', at: [10, 10], shape: { kind: 'rect', width: 4, height: 2, rotation: 90 } },
+          {
+            type: 'flash',
+            at: [10, 10],
+            shape: { kind: 'rect', width: 4, height: 2, rotation: 90 },
+          },
         ]),
         'top',
       )!;
@@ -123,7 +141,11 @@ describe('buildBoardGeometry', () => {
     it('builds an obround along its longer axis', () => {
       const geo = buildBoardGeometry(
         projectWith('topCopper', [
-          { type: 'flash', at: [0, 0], shape: { kind: 'obround', width: 2, height: 4, rotation: 0 } },
+          {
+            type: 'flash',
+            at: [0, 0],
+            shape: { kind: 'obround', width: 2, height: 4, rotation: 0 },
+          },
         ]),
         'top',
       )!;
@@ -143,7 +165,15 @@ describe('buildBoardGeometry', () => {
           {
             type: 'flash',
             at: [10, 20],
-            shape: { kind: 'polygon', points: [[0, 0], [2, 0], [2, 2], [0, 2]] },
+            shape: {
+              kind: 'polygon',
+              points: [
+                [0, 0],
+                [2, 0],
+                [2, 2],
+                [0, 2],
+              ],
+            },
           },
         ]),
         'top',
@@ -160,7 +190,18 @@ describe('buildBoardGeometry', () => {
       // An L shape, 3 x 3 minus a 2 x 2 corner = 5.
       const geo = buildBoardGeometry(
         projectWith('topCopper', [
-          { type: 'region', points: [[0, 0], [3, 0], [3, 1], [1, 1], [1, 3], [0, 3], [0, 0]] },
+          {
+            type: 'region',
+            points: [
+              [0, 0],
+              [3, 0],
+              [3, 1],
+              [1, 1],
+              [1, 3],
+              [0, 3],
+              [0, 0],
+            ],
+          },
         ]),
         'top',
       )!;
@@ -170,11 +211,32 @@ describe('buildBoardGeometry', () => {
 
     it('handles clockwise winding and a comb of reflex corners', () => {
       const comb: [number, number][] = [
-        [0, 0], [9, 0], [9, 4], [8, 4], [8, 1], [7, 1], [7, 4], [6, 4], [6, 1], [5, 1],
-        [5, 4], [4, 4], [4, 1], [3, 1], [3, 4], [2, 4], [2, 1], [1, 1], [1, 4], [0, 4],
+        [0, 0],
+        [9, 0],
+        [9, 4],
+        [8, 4],
+        [8, 1],
+        [7, 1],
+        [7, 4],
+        [6, 4],
+        [6, 1],
+        [5, 1],
+        [5, 4],
+        [4, 4],
+        [4, 1],
+        [3, 1],
+        [3, 4],
+        [2, 4],
+        [2, 1],
+        [1, 1],
+        [1, 4],
+        [0, 4],
       ];
       // 9 x 4 minus four 1 x 3 slots (x 1..2, 3..4, 5..6, 7..8, each y 1..4) = 36 - 12 = 24.
-      const ccw = buildBoardGeometry(projectWith('topCopper', [{ type: 'region', points: comb }]), 'top')!;
+      const ccw = buildBoardGeometry(
+        projectWith('topCopper', [{ type: 'region', points: comb }]),
+        'top',
+      )!;
       expect(area(ccw.copper)).toBeCloseTo(24, 6);
       const cw = buildBoardGeometry(
         projectWith('topCopper', [{ type: 'region', points: [...comb].reverse() }]),
@@ -187,11 +249,34 @@ describe('buildBoardGeometry', () => {
       const regions: [number, number][][] = [
         [],
         [[1, 1]],
-        [[0, 0], [1, 1]],
-        [[0, 0], [1, 1], [2, 2], [3, 3]],
-        [[0, 0], [0, 0], [0, 0], [0, 0]],
-        [[0, 0], [2, 2], [2, 0], [0, 2]],
-        [[0, 0], [Number.NaN, 1], [1, 1], [1, 0]],
+        [
+          [0, 0],
+          [1, 1],
+        ],
+        [
+          [0, 0],
+          [1, 1],
+          [2, 2],
+          [3, 3],
+        ],
+        [
+          [0, 0],
+          [0, 0],
+          [0, 0],
+          [0, 0],
+        ],
+        [
+          [0, 0],
+          [2, 2],
+          [2, 0],
+          [0, 2],
+        ],
+        [
+          [0, 0],
+          [Number.NaN, 1],
+          [1, 1],
+          [1, 0],
+        ],
       ];
       for (const points of regions) {
         expect(() =>
@@ -234,6 +319,45 @@ describe('buildBoardGeometry', () => {
         { x: 1, y: 2, diameter: 0.8 },
         { x: 3, y: 4, diameter: 1 },
       ]);
+    });
+  });
+
+  describe('blank', () => {
+    it('is null when the project has no blank', () => {
+      expect(buildBoardGeometry(parsedProject(), 'top')?.blank).toBeNull();
+    });
+
+    it('passes the project blank through unchanged, for either side', () => {
+      const blank = { minX: 122, minY: -118, maxX: 168, maxY: -72 };
+      const project = parsedProject({ blank });
+      expect(buildBoardGeometry(project, 'top')?.blank).toEqual(blank);
+      expect(buildBoardGeometry(project, 'bottom')?.blank).toEqual(blank);
+    });
+  });
+
+  describe('pegHoles', () => {
+    const template = [
+      { x: 125, y: -75, diameter: 2.2 },
+      { x: 125, y: -115, diameter: 2.2 },
+      { x: 165, y: -75, diameter: 2.2 },
+      { x: 165, y: -115, diameter: 2.2 },
+    ];
+
+    it('is empty when the project has none', () => {
+      expect(buildBoardGeometry(parsedProject(), 'top')?.pegHoles).toEqual([]);
+    });
+
+    it('passes the project peg holes through, for either side', () => {
+      const project = parsedProject({ pegHoles: template });
+      expect(buildBoardGeometry(project, 'top')?.pegHoles).toEqual(template);
+      expect(buildBoardGeometry(project, 'bottom')?.pegHoles).toEqual(template);
+    });
+
+    it('keeps plated drill holes out of the pegs', () => {
+      const project = projectWith('drill', [{ type: 'hole', at: [1, 2], diameter: 0.8 }]);
+      const geo = buildBoardGeometry({ ...project, pegHoles: template }, 'top')!;
+      expect(geo.holes).toHaveLength(1);
+      expect(geo.pegHoles).toHaveLength(4);
     });
   });
 

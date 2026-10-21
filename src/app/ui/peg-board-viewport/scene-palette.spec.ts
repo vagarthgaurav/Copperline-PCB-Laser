@@ -13,7 +13,7 @@ describe('readPalette', () => {
       '--scene-laser': 'tomato',
       '--scene-done': 'wheat',
       '--border-strong': 'gray',
-      '--ink': 'black',
+      '--scene-blank': 'dimgray',
     };
     for (const [name, value] of Object.entries(tokens)) {
       el.style.setProperty(name, value);
@@ -27,7 +27,7 @@ describe('readPalette', () => {
       laser: 'tomato',
       done: 'wheat',
       rim: 'gray',
-      ink: 'black',
+      blank: 'dimgray',
     });
     el.remove();
   });

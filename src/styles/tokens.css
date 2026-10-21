@@ -26,6 +26,7 @@
   --scene-floor: #d6c9b6;
   --scene-peg: #6e6152;
   --scene-board: #35523f;
+  --scene-blank: #82643f;
   --scene-copper: #d89a62;
   --scene-laser: #ff7a45;
   --scene-done: #f2e4cc;
@@ -59,6 +60,7 @@
   --scene-floor: #2a241e;
   --scene-peg: #8d7e6c;
   --scene-board: #3f6b4e;
+  --scene-blank: #9a7d56;
   --scene-copper: #f0b87e;
   --scene-laser: #ff8a5c;
   --scene-done: #f6e8d0;
@@ -94,6 +96,7 @@
     --scene-floor: #2a241e;
     --scene-peg: #8d7e6c;
     --scene-board: #3f6b4e;
+    --scene-blank: #9a7d56;
     --scene-copper: #f0b87e;
     --scene-laser: #ff8a5c;
     --scene-done: #f6e8d0;

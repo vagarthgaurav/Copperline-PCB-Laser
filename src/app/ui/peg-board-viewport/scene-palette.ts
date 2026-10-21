@@ -10,7 +10,7 @@ const PALETTE_TOKENS: Record<keyof ScenePalette, string> = {
   laser: '--scene-laser',
   done: '--scene-done',
   rim: '--border-strong',
-  ink: '--ink',
+  blank: '--scene-blank',
 };
 
 /**

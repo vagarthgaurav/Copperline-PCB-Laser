@@ -74,6 +74,17 @@ export function transformedBounds(bounds: Bounds, m: Affine2D): Bounds {
   };
 }
 
+/** The area that grabs the board: its bounds, widened to the blank when there is one. */
+export function grabBounds(bounds: Bounds, blank: Bounds | null): Bounds {
+  if (!blank) return bounds;
+  return {
+    minX: Math.min(bounds.minX, blank.minX),
+    minY: Math.min(bounds.minY, blank.minY),
+    maxX: Math.max(bounds.maxX, blank.maxX),
+    maxY: Math.max(bounds.maxY, blank.maxY),
+  };
+}
+
 /** Whether a machine-mm point lies over the placed board. */
 export function pointInBoard(x: number, y: number, bounds: Bounds, m: Affine2D): boolean {
   const box = transformedBounds(bounds, m);
@@ -360,7 +371,7 @@ export function rayPlaneZ(
 
 /**
  * Centres of the floor's peg holes, flat x,y pairs. Holes sit on multiples of
- * `pitch` (so the origin peg is on one); any that would touch the floor edge are skipped.
+ * `pitch` (so the origin is on one); any that would touch the floor edge are skipped.
  */
 export function holeGrid(floor: Bounds, pitch: number, diameter: number): Float32Array {
   const r = diameter / 2;

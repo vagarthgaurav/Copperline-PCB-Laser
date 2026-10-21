@@ -72,7 +72,14 @@ export function buildBoardGeometry(
   if (outline.length === 0) {
     outline = [boundsRing(bounds)];
   }
-  return { bounds, copper: buffer.finish(), outline, holes };
+  return {
+    bounds,
+    copper: buffer.finish(),
+    outline,
+    holes,
+    blank: project.blank,
+    pegHoles: project.pegHoles,
+  };
 }
 
 // ---------------------------------------------------------------------------

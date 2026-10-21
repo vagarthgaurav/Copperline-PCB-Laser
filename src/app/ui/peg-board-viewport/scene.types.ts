@@ -17,8 +17,8 @@ export interface ScenePalette {
   done: string;
   /** `--border-strong`: the board rim. */
   rim: string;
-  /** `--ink`: peg label text. */
-  ink: string;
+  /** `--scene-blank`: the bare copper-clad blank around the board. */
+  blank: string;
 }
 
 /** Triangulated copper for one board side, in board coordinates (Gerber mm, +Y up). */
@@ -31,6 +31,10 @@ export interface BoardGeometry {
   outline: Float32Array[];
   /** Drill holes. */
   holes: { x: number; y: number; diameter: number }[];
+  /** The physical blank's rectangle (same frame as `bounds`), drawn as a bare slab under the board; null draws nothing. */
+  blank: Bounds | null;
+  /** Peg holes of the board (the non-plated drill file); a peg stands in each. Empty draws no pegs. */
+  pegHoles: readonly { x: number; y: number; diameter: number }[];
 }
 
 /** One G-code move as a segment, in machine mm. */

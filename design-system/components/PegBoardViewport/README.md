@@ -16,11 +16,11 @@ One per workspace screen, as the main canvas. Use the same frame for live jobs a
 - Do draw the scene only with `scene-*` tokens; the board always gets a `border-strong` rim (it is 2.4:1 on the floor in dark).
 - Do keep overlay chips on `surface-200` with a `border-strong` border so they read on any scene colour.
 - Do show the legend text next to every swatch; engraved vs copper is not told by colour alone (also: engraved is thicker).
-- Don't put text directly on the scene without a halo (the "Origin peg" label uses a floor-coloured stroke).
+- Don't put text directly on the scene without a halo.
 - Don't hard-code hex in scene shaders or SVG; read the custom properties.
 
 ## Tokens
-`scene-bg scene-floor scene-peg scene-board scene-copper scene-laser scene-done`, `surface-200`, `surface-sunken`, `border-strong`, `accent-soft`, `accent-strong`, `ink`, `ink-muted`, `ring`, `radius-lg`, `radius-md`, `radius-sm`, `space-2`, `space-3`, `shadow-sm`.
+`scene-bg scene-floor scene-peg scene-blank scene-board scene-copper scene-laser scene-done`, `surface-200`, `surface-sunken`, `border-strong`, `accent-soft`, `accent-strong`, `ink`, `ink-muted`, `ring`, `radius-lg`, `radius-md`, `radius-sm`, `space-2`, `space-3`, `shadow-sm`.
 
 ## Accessibility
 - The scene is `role="img"` with an `aria-label` describing board position and job state; update it when the state changes.

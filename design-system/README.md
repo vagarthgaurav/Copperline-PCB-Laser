@@ -18,7 +18,7 @@ Copperline is the interface for a laser machine that engraves photo-resist on co
 - **Type.** `display`, `title` and `heading` use Bricolage Grotesque; all UI text uses Instrument Sans; G-code, console and position readouts use JetBrains Mono. All three load from Google Fonts. Controls are 36px high (`body-strong` labels), 32px in dense toolbars.
 - **Spacing and radius.** Panel padding `space-4`, gap between panels `space-2`, gap between sections `space-6`. Buttons, inputs and tabs `radius-md`; chips, switches and slider thumbs `radius-pill`.
 - **Motion.** None is required. Do not animate the laser or progress beyond what the real position data drives.
-- **The 3D scene.** Paint the viewport only with `scene-*` tokens: `scene-bg` behind, `scene-floor` for the peg board, `scene-peg` for holes and pegs, `scene-board` for the PCB (with a `border-strong` rim in the dark theme), `scene-copper` for Gerber copper, `scene-laser` for the head and beam, `scene-done` for engraved copper. Three.js materials read these values from CSS custom properties at theme change, never from literals.
+- **The 3D scene.** Paint the viewport only with `scene-*` tokens: `scene-bg` behind, `scene-floor` for the peg board, `scene-peg` for holes and pegs, `scene-blank` for the bare blank around the board, `scene-board` for the PCB (with a `border-strong` rim in the dark theme), `scene-copper` for Gerber copper, `scene-laser` for the head and beam, `scene-done` for engraved copper. Three.js materials read these values from CSS custom properties at theme change, never from literals.
 
 ## Peg board and placement rules
 

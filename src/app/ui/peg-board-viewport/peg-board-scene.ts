@@ -14,6 +14,7 @@ import {
   defaultView,
   extractFeed,
   fitCamera,
+  grabBounds,
   holeGrid,
   orbitView,
   panView,
@@ -57,10 +58,6 @@ const LASER_CONE = { radius: 1.6, height: 4 };
 /** Top of the laser head housing: the highest point of the scene, for the clip planes. */
 const SCENE_TOP = LASER_TIP_Z + LASER_CONE.height * 2;
 
-/** Peg label sprite: height in mm and canvas font size in px (drawn at 2x for sharpness). */
-const LABEL_HEIGHT = 7;
-const LABEL_FONT_PX = 48;
-
 /** Share of the way from the floor colour to the peg colour used for the hole grid. */
 const HOLE_BLEND = 0.5;
 
@@ -82,7 +79,7 @@ interface PathData {
 }
 
 /**
- * Plain Three.js scene for the peg board: floor, pegs, the placed board with
+ * Plain Three.js scene for the peg board: floor, the placed board with its pegs,
  * its copper, the G-code path and the laser head. Renders on demand (no
  * animation loop). No Angular imports: `PegBoardViewport` owns the canvas.
  */
@@ -96,13 +93,13 @@ export class PegBoardScene implements PegBoardSceneApi {
   private readonly boardGroup = new THREE.Group();
   private readonly pathGroup = new THREE.Group();
   private readonly laserGroup = new THREE.Group();
-  private readonly labels: { sprite: THREE.Sprite; text: string }[] = [];
 
   // Materials live as long as the scene; palette changes recolour them in place.
   private readonly floorMat = new THREE.MeshLambertMaterial();
   private readonly pegMat = new THREE.MeshLambertMaterial();
   private readonly holeMat = new THREE.MeshBasicMaterial();
   private readonly boardMat = new THREE.MeshLambertMaterial();
+  private readonly blankMat = new THREE.MeshLambertMaterial();
   private readonly copperMat = new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide,
     polygonOffset: true,
@@ -139,9 +136,14 @@ export class PegBoardScene implements PegBoardSceneApi {
   private frame = 0;
   private disposed = false;
 
-  constructor(private readonly canvas: HTMLCanvasElement) {
+  /** `renderer` is a seam for specs (jsdom has no WebGL); the app lets the scene create its own. */
+  constructor(
+    private readonly canvas: HTMLCanvasElement,
+    renderer?: THREE.WebGLRenderer,
+  ) {
     try {
-      this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+      this.renderer =
+        renderer ?? new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
     } catch (error) {
       const reason = error instanceof Error ? error.message : String(error);
       throw new Error(`WebGL is not available, cannot draw the peg board (${reason})`);
@@ -212,7 +214,9 @@ export class PegBoardScene implements PegBoardSceneApi {
   hitBoard(canvasX: number, canvasY: number): boolean {
     if (!this.state?.board || !this.transform) return false;
     const hit = this.pick(canvasX, canvasY, BOARD_TOP);
-    return hit !== null && pointInBoard(hit.x, hit.y, this.state.board.bounds, this.transform);
+    // The blank counts as part of the board, so it can be grabbed by its peg-hole margin.
+    const { bounds, blank } = this.state.board;
+    return hit !== null && pointInBoard(hit.x, hit.y, grabBounds(bounds, blank), this.transform);
   }
 
   orbit(dAzimuthDeg: number, dElevationDeg: number): void {
@@ -261,11 +265,6 @@ export class PegBoardScene implements PegBoardSceneApi {
     for (const group of [this.floorGroup, this.boardGroup, this.pathGroup, this.laserGroup]) {
       this.clearGroup(group);
     }
-    for (const { sprite } of this.labels) {
-      sprite.material.map?.dispose();
-      sprite.material.dispose();
-    }
-    this.labels.length = 0;
     for (const material of [
       this.floorMat,
       this.pegMat,
@@ -274,6 +273,7 @@ export class PegBoardScene implements PegBoardSceneApi {
       this.copperMat,
       this.drillMat,
       this.rimMat,
+      this.blankMat,
       this.doneMat,
       this.remainingMat,
       this.laserMat,
@@ -292,7 +292,7 @@ export class PegBoardScene implements PegBoardSceneApi {
     return light;
   }
 
-  /** Slab, hole grid, pegs and peg labels. Static, so built once. */
+  /** Slab and hole grid. Static, so built once. */
   private buildFloor(): void {
     const floor = floorBounds();
     const w = floor.maxX - floor.minX;
@@ -313,34 +313,6 @@ export class PegBoardScene implements PegBoardSceneApi {
     }
     discs.instanceMatrix.needsUpdate = true;
     this.floorGroup.add(discs);
-
-    // Cylinders stand along Y by default; turn them to stand along Z.
-    const pegGeometry = new THREE.CylinderGeometry(
-      PEG_BOARD.pegDiameter / 2,
-      PEG_BOARD.pegDiameter / 2,
-      PEG_BOARD.pegHeight,
-      24,
-    );
-    pegGeometry.rotateX(Math.PI / 2);
-    for (const peg of PEG_BOARD.pegs) {
-      const mesh = new THREE.Mesh(pegGeometry, this.pegMat);
-      mesh.position.set(peg.x, peg.y, PEG_BOARD.pegHeight / 2);
-      this.floorGroup.add(mesh);
-      if (peg.label) this.addLabel(peg);
-    }
-  }
-
-  /** Label sprite, hidden until the palette provides a texture. Sits up and to the left of its peg. */
-  private addLabel(peg: { x: number; y: number; label: string }): void {
-    const sprite = new THREE.Sprite(
-      new THREE.SpriteMaterial({ depthTest: false, transparent: true }),
-    );
-    sprite.center.set(1, 0);
-    sprite.position.set(peg.x - PEG_BOARD.pegDiameter, peg.y, PEG_BOARD.pegHeight + 1);
-    sprite.renderOrder = 10;
-    sprite.visible = false;
-    this.labels.push({ sprite, text: peg.label });
-    this.floorGroup.add(sprite);
   }
 
   /** Board geometry in board coordinates; `placeBoard` positions the group. */
@@ -348,7 +320,15 @@ export class PegBoardScene implements PegBoardSceneApi {
     this.clearGroup(this.boardGroup);
     if (!board) return;
 
-    this.boardGroup.add(new THREE.Mesh(this.slabGeometry(board), this.boardMat));
+    if (board.blank) {
+      // The bare blank is the board: a box of the board thickness, so the peg holes sit in it.
+      const { minX, minY, maxX, maxY } = board.blank;
+      const box = new THREE.BoxGeometry(maxX - minX, maxY - minY, BOARD_TOP);
+      box.translate((minX + maxX) / 2, (minY + maxY) / 2, BOARD_TOP / 2);
+      this.boardGroup.add(new THREE.Mesh(box, this.blankMat));
+    } else {
+      this.boardGroup.add(new THREE.Mesh(this.slabGeometry(board), this.boardMat));
+    }
 
     if (board.copper.length >= 9) {
       const copper = new THREE.BufferGeometry();
@@ -378,6 +358,17 @@ export class PegBoardScene implements PegBoardSceneApi {
       this.boardGroup.add(drills);
     }
 
+    if (board.pegHoles.length > 0) {
+      // Standing on the floor (the board group's z = 0 is the floor surface) and through the board.
+      const pegs = new THREE.InstancedMesh(this.pegGeometry(), this.pegMat, board.pegHoles.length);
+      const at = new THREE.Matrix4();
+      board.pegHoles.forEach((hole, i) => {
+        pegs.setMatrixAt(i, at.makeTranslation(hole.x, hole.y, PEG_BOARD.pegHeight / 2));
+      });
+      pegs.instanceMatrix.needsUpdate = true;
+      this.boardGroup.add(pegs);
+    }
+
     for (const ring of board.outline) {
       if (ring.length < 6) continue;
       const rim = new THREE.BufferGeometry();
@@ -387,6 +378,17 @@ export class PegBoardScene implements PegBoardSceneApi {
       );
       this.boardGroup.add(new THREE.LineLoop(rim, this.rimMat));
     }
+  }
+
+  /** One peg: a cylinder standing along Z, centred on its own origin. */
+  private pegGeometry(): THREE.BufferGeometry {
+    // Cylinders stand along Y by default; turn them to stand along Z.
+    return new THREE.CylinderGeometry(
+      PEG_BOARD.pegDiameter / 2,
+      PEG_BOARD.pegDiameter / 2,
+      PEG_BOARD.pegHeight,
+      24,
+    ).rotateX(Math.PI / 2);
   }
 
   /**
@@ -526,7 +528,7 @@ export class PegBoardScene implements PegBoardSceneApi {
 
   // --- palette ----------------------------------------------------------
 
-  /** Recolours every material and the clear colour, and redraws the label textures (halo needs the colours). */
+  /** Recolours every material and the clear colour. */
   private applyPalette(): void {
     const p = this.palette;
     if (!p) return;
@@ -538,50 +540,11 @@ export class PegBoardScene implements PegBoardSceneApi {
     this.copperMat.color.set(p.copper);
     this.drillMat.color.set(p.bg);
     this.rimMat.color.set(p.rim);
+    this.blankMat.color.set(p.blank);
     this.doneMat.color.set(p.done);
     this.remainingMat.color.set(p.copper);
     this.laserMat.color.set(p.laser);
     this.beamMat.color.set(p.laser);
-
-    for (const label of this.labels) {
-      const { texture, aspect } = this.labelTexture(label.text, p);
-      const material = label.sprite.material;
-      material.map?.dispose();
-      material.map = texture;
-      material.needsUpdate = true;
-      label.sprite.scale.set(LABEL_HEIGHT * aspect, LABEL_HEIGHT, 1);
-      label.sprite.visible = true;
-    }
-  }
-
-  /** Text in `ink` with a `floor` halo, as the design requires for text over the scene. */
-  private labelTexture(
-    text: string,
-    p: ScenePalette,
-  ): { texture: THREE.CanvasTexture; aspect: number } {
-    const family = getComputedStyle(this.canvas).fontFamily || 'sans-serif';
-    const font = `500 ${LABEL_FONT_PX}px ${family}`;
-    const halo = LABEL_FONT_PX * 0.3;
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) throw new Error('2D canvas is not available, cannot draw the peg label');
-    ctx.font = font;
-    canvas.width = Math.ceil(ctx.measureText(text).width + halo * 2);
-    canvas.height = Math.ceil(LABEL_FONT_PX * 1.4 + halo);
-    // Resizing resets the context state.
-    ctx.font = font;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.lineJoin = 'round';
-    ctx.lineWidth = halo;
-    ctx.strokeStyle = p.floor;
-    ctx.fillStyle = p.ink;
-    ctx.strokeText(text, canvas.width / 2, canvas.height / 2);
-    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.colorSpace = THREE.SRGBColorSpace;
-    return { texture, aspect: canvas.width / canvas.height };
   }
 
   // --- view -------------------------------------------------------------
@@ -685,7 +648,6 @@ export class PegBoardScene implements PegBoardSceneApi {
   private clearGroup(group: THREE.Group): void {
     for (const child of [...group.children]) {
       group.remove(child);
-      if (child instanceof THREE.Sprite) continue; // owned by `labels`
       if (child instanceof THREE.InstancedMesh) child.dispose();
       if (child instanceof THREE.Mesh || child instanceof THREE.Line) child.geometry.dispose();
     }
