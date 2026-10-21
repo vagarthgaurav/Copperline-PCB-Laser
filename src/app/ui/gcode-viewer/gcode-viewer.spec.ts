@@ -24,6 +24,20 @@ function program(count: number): string[] {
   return Array.from({ length: count }, (_, i) => `G1 X${i}.000 Y${i}.500`);
 }
 
+function nextFrame(): Promise<void> {
+  return new Promise((resolve) => requestAnimationFrame(() => resolve()));
+}
+
+function sizerHeight(el: HTMLElement): number {
+  return parseFloat(el.querySelector<HTMLElement>('.sizer')!.style.height);
+}
+
+/** The window's translateY offset in px. */
+function windowOffset(el: HTMLElement): number {
+  const match = /translateY\((-?[\d.]+)px\)/.exec(el.querySelector<HTMLElement>('.window')!.style.transform);
+  return match ? parseFloat(match[1]) : NaN;
+}
+
 describe('GcodeViewer', () => {
   async function setup(lines: readonly string[], currentLine = 0) {
     const fixture = TestBed.createComponent(Host);
@@ -127,21 +141,24 @@ describe('GcodeViewer', () => {
     const { el, rows } = await setup(program(10_000));
     expect(rows().length).toBeGreaterThan(10);
     expect(rows().length).toBeLessThan(100);
-    const list = el.querySelector<HTMLElement>('ol')!;
-    expect(list.getAttribute('tabindex')).toBe('0');
-    expect(list.getAttribute('aria-label')).toBe('G-code lines');
+    const scroller = el.querySelector<HTMLElement>('.scroller')!;
+    expect(scroller.getAttribute('tabindex')).toBe('0');
+    expect(scroller.getAttribute('role')).toBe('group');
+    expect(scroller.getAttribute('aria-label')).toBe('G-code lines');
     expect(rows()[0].getAttribute('aria-setsize')).toBe('10000');
-    // The unrendered rows are accounted for by padding so the scrollbar is right.
-    const rendered = rows().length;
-    expect(parseInt(list.style.paddingBottom, 10)).toBe((10_000 - rendered) * 22);
+    // The sizer gives the scrollbar its full range; the window is moved by a transform.
+    expect(sizerHeight(el)).toBe(10_000 * 22);
+    expect(windowOffset(el)).toBe(0);
+    expect(el.querySelector('.window')!.parentElement).toBe(el.querySelector('.sizer'));
   });
 
   it('follows the current line, centred, and renders the rows around it', async () => {
-    const { fixture, host, el, rows } = await setup(program(10_000), 5000);
-    const list = el.querySelector<HTMLElement>('ol')!;
+    const { host, fixture, el, rows } = await setup(program(10_000), 5000);
+    const list = el.querySelector<HTMLElement>('.scroller')!;
     expect(list.scrollTop).toBe(4999 * 22 - (440 - 22) / 2);
     expect(rows().length).toBeLessThan(100);
     expect(rows().some((r) => r.getAttribute('aria-current') === 'step')).toBe(true);
+    expect(sizerHeight(el)).toBe(10_000 * 22);
 
     host.currentLine.set(5001);
     await fixture.whenStable();
@@ -149,15 +166,54 @@ describe('GcodeViewer', () => {
     expect(rows().some((r) => r.querySelector('.n')!.textContent === '5001' && r.classList.contains('cur'))).toBe(true);
   });
 
+  it('places the window with a transform at the first rendered row', async () => {
+    const { el, rows } = await setup(program(10_000), 5000);
+    const first = Number(rows()[0].querySelector('.n')!.textContent) - 1;
+    expect(first).toBeGreaterThan(0);
+    expect(windowOffset(el)).toBe(first * 22);
+  });
+
+  it('moves the window on scroll without changing the sizer height', async () => {
+    const { fixture, el, rows } = await setup(program(10_000));
+    const list = el.querySelector<HTMLElement>('.scroller')!;
+    const height = sizerHeight(el);
+    expect(windowOffset(el)).toBe(0);
+
+    list.scrollTop = 22 * 1000;
+    list.dispatchEvent(new Event('scroll'));
+    await nextFrame();
+    await fixture.whenStable();
+    // First rendered row is 8 (overscan) rows above the scroll position.
+    expect(rows()[0].querySelector('.n')!.textContent).toBe('993');
+    expect(windowOffset(el)).toBe(992 * 22);
+    expect(sizerHeight(el)).toBe(height);
+    expect(rows().length).toBeLessThan(100);
+  });
+
+  it('coalesces several scroll events into the latest position', async () => {
+    const { fixture, el, rows } = await setup(program(10_000));
+    const list = el.querySelector<HTMLElement>('.scroller')!;
+    for (const row of [100, 200, 300]) {
+      list.scrollTop = row * 22;
+      list.dispatchEvent(new Event('scroll'));
+    }
+    await nextFrame();
+    await fixture.whenStable();
+    expect(rows()[0].querySelector('.n')!.textContent).toBe('293');
+    expect(windowOffset(el)).toBe(292 * 22);
+  });
+
   it('stops following after a manual scroll until the current line changes', async () => {
     const { fixture, host, el, rows } = await setup(program(10_000), 5000);
-    const list = el.querySelector<HTMLElement>('ol')!;
+    const list = el.querySelector<HTMLElement>('.scroller')!;
 
     list.scrollTop = 220;
     list.dispatchEvent(new Event('scroll'));
+    await nextFrame();
     await fixture.whenStable();
     expect(list.scrollTop).toBe(220);
     expect(rows()[0].querySelector('.n')!.textContent).toBe('3');
+    expect(windowOffset(el)).toBe(2 * 22);
     expect(rows().some((r) => r.getAttribute('aria-current') === 'step')).toBe(false);
 
     host.currentLine.set(5002);

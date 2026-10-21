@@ -1,9 +1,11 @@
 import {
   Component,
+  DestroyRef,
   booleanAttribute,
   ElementRef,
   computed,
   effect,
+  inject,
   input,
   output,
   signal,
@@ -28,8 +30,11 @@ let nextId = 0;
 /**
  * Read-only, line-numbered G-code panel with an Export action and a progress
  * footer. Only the rows in and near the viewport are rendered (fixed 22px
- * rows, spacing above and below via padding), so programs with tens of
- * thousands of lines stay cheap. It follows `currentLine` (centred) whenever
+ * rows), so programs with tens of thousands of lines stay cheap. The scroll
+ * geometry is static: a sizer of `total * 22px` gives the scrollbar its range
+ * and the rendered window inside it is moved with a compositor-only transform,
+ * so scrolling never relayouts the (possibly multi-million px) scroll area.
+ * Scroll updates are coalesced to one per animation frame. It follows `currentLine` (centred) whenever
  * that changes; scrolling by hand pauses following until it changes again.
  * Fills the height of its container, so give the parent a flex column.
  */
@@ -51,38 +56,41 @@ let nextId = 0;
     </div>
 
     @if (hasLines()) {
-      <ol
+      <div
         #list
+        class="scroller"
         tabindex="0"
+        role="group"
         aria-label="G-code lines"
-        [style.padding-top.px]="padTop()"
-        [style.padding-bottom.px]="padBottom()"
-        [style.--digits]="digits()"
         (scroll)="onScroll()"
       >
-        @for (row of rows(); track row.number) {
-          <li
-            class="gl"
-            [class.done]="row.state === 'done'"
-            [class.cur]="row.state === 'current'"
-            [attr.aria-current]="row.state === 'current' ? 'step' : null"
-            [attr.aria-posinset]="row.number"
-            [attr.aria-setsize]="total()"
-          >
-            <span class="n">{{ row.number }}</span>
-            <span class="car">
-              @if (row.state === 'current') {
-                <app-icon name="caret-right" weight="fill" [size]="14" />
-              }
-            </span>
-            <span class="s">
-              @for (token of row.tokens; track $index) {
-                <span [class.g]="token.kind === 'word'" [class.c]="token.kind === 'comment'">{{ token.text }}</span>
-              }
-            </span>
-          </li>
-        }
-      </ol>
+        <div class="sizer" [style.height.px]="sizerHeight()">
+          <ol class="window" [style.transform]="windowTransform()" [style.--digits]="digits()">
+            @for (row of rows(); track row.number) {
+              <li
+                class="gl"
+                [class.done]="row.state === 'done'"
+                [class.cur]="row.state === 'current'"
+                [attr.aria-current]="row.state === 'current' ? 'step' : null"
+                [attr.aria-posinset]="row.number"
+                [attr.aria-setsize]="total()"
+              >
+                <span class="n">{{ row.number }}</span>
+                <span class="car">
+                  @if (row.state === 'current') {
+                    <app-icon name="caret-right" weight="fill" [size]="14" />
+                  }
+                </span>
+                <span class="s">
+                  @for (token of row.tokens; track $index) {
+                    <span [class.g]="token.kind === 'word'" [class.c]="token.kind === 'comment'">{{ token.text }}</span>
+                  }
+                </span>
+              </li>
+            }
+          </ol>
+        </div>
+      </div>
     } @else {
       <p class="empty small">{{ emptyMessage() }}</p>
     }
@@ -122,8 +130,10 @@ export class GcodeViewer {
 
   protected readonly headingId = `gcode-viewer-${nextId++}`;
 
-  private readonly list = viewChild<ElementRef<HTMLOListElement>>('list');
+  private readonly list = viewChild<ElementRef<HTMLElement>>('list');
   private readonly scrollTop = signal(0);
+  private pendingScrollTop = 0;
+  private scrollFrame: number | null = null;
   private readonly viewportHeight = signal(FALLBACK_VIEWPORT_HEIGHT);
 
   protected readonly total = computed(() => this.lines().length);
@@ -154,8 +164,10 @@ export class GcodeViewer {
     const first = Math.min(Math.max(0, Math.floor(top / ROW_HEIGHT) - OVERSCAN), last);
     return { first, last };
   });
-  protected readonly padTop = computed(() => this.range().first * ROW_HEIGHT);
-  protected readonly padBottom = computed(() => (this.total() - this.range().last) * ROW_HEIGHT);
+  /** Height of the scroll area; static for a given program, whatever the scroll position. */
+  protected readonly sizerHeight = computed(() => this.total() * ROW_HEIGHT);
+  /** Moves the rendered window to the first row's place without relayout. */
+  protected readonly windowTransform = computed(() => `translateY(${this.range().first * ROW_HEIGHT}px)`);
 
   protected readonly rows = computed(() => {
     const { first, last } = this.range();
@@ -174,6 +186,8 @@ export class GcodeViewer {
   });
 
   constructor() {
+    inject(DestroyRef).onDestroy(() => this.cancelScrollFrame());
+
     // Follow the current line. This only re-runs when `currentLine` changes (or
     // the list first appears), so scrolling by hand pauses following until the
     // next line change, as intended.
@@ -184,6 +198,8 @@ export class GcodeViewer {
       untracked(() => {
         const top = Math.max(0, (line - 1) * ROW_HEIGHT - (this.viewportHeight() - ROW_HEIGHT) / 2);
         list.scrollTop = top;
+        // A queued frame would apply an older position over this one.
+        this.cancelScrollFrame();
         this.scrollTop.set(top);
       });
     });
@@ -202,7 +218,23 @@ export class GcodeViewer {
 
   protected onScroll(): void {
     const list = this.list()?.nativeElement;
-    if (list) this.scrollTop.set(list.scrollTop);
+    if (!list) return;
+    this.pendingScrollTop = list.scrollTop;
+    if (typeof requestAnimationFrame === 'undefined') {
+      this.scrollTop.set(this.pendingScrollTop);
+      return;
+    }
+    if (this.scrollFrame !== null) return;
+    this.scrollFrame = requestAnimationFrame(() => {
+      this.scrollFrame = null;
+      this.scrollTop.set(this.pendingScrollTop);
+    });
+  }
+
+  private cancelScrollFrame(): void {
+    if (this.scrollFrame === null) return;
+    cancelAnimationFrame(this.scrollFrame);
+    this.scrollFrame = null;
   }
 }
 
