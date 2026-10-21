@@ -1,6 +1,8 @@
 //! End-to-end tests of `parse_project` with small synthetic fixtures.
 
-use super::model::{BoardSource, FlashShape, LayerKind, ParsedLayer, ParsedProject, Primitive};
+use super::model::{
+  BoardSource, Bounds, FlashShape, LayerKind, ParsedLayer, ParsedProject, PegHole, Primitive,
+};
 use super::{InputFile, parse_project};
 
 fn file(name: &str, content: &str) -> InputFile {
@@ -588,4 +590,157 @@ fn serialises_to_the_contract_json_shape() {
   assert_eq!(layer["bounds"]["minX"], -1.0);
   assert_eq!(json["board"]["source"], "copper");
   assert!(json["skipped"].as_array().unwrap().is_empty());
+}
+
+// KiCad export of the blank-board test design (46 x 46 mm blank, 38 x 38 mm board).
+const BLANK_EDGE: &str = include_str!("fixtures/LaserTemplates-Blank_Edge.gbr");
+const EDGE_CUTS: &str = include_str!("fixtures/LaserTemplates-Edge_Cuts.gbr");
+const NPTH: &str = include_str!("fixtures/LaserTemplates-NPTH.drl");
+const PTH: &str = include_str!("fixtures/LaserTemplates-PTH.drl");
+
+const BLANK_BOUNDS: Bounds = Bounds {
+  min_x: 122.0,
+  min_y: -118.0,
+  max_x: 168.0,
+  max_y: -72.0,
+};
+
+fn peg(x: f64, y: f64) -> PegHole {
+  PegHole {
+    x,
+    y,
+    diameter: 2.2,
+  }
+}
+
+fn blank_export() -> Vec<InputFile> {
+  vec![
+    file("LaserTemplates-Blank_Edge.gbr", BLANK_EDGE),
+    file("LaserTemplates-Edge_Cuts.gbr", EDGE_CUTS),
+    file("LaserTemplates-NPTH.drl", NPTH),
+    file("LaserTemplates-PTH.drl", PTH),
+  ]
+}
+
+#[test]
+fn blank_and_peg_holes_come_from_the_export() {
+  let project = parse_project(&blank_export());
+  assert_eq!(project.blank, Some(BLANK_BOUNDS));
+  assert_eq!(
+    project.peg_holes,
+    vec![
+      peg(125.0, -75.0),
+      peg(125.0, -115.0),
+      peg(165.0, -75.0),
+      peg(165.0, -115.0)
+    ]
+  );
+  // The blank is neither a layer nor skipped; the board is still the outline.
+  assert!(project.skipped.is_empty(), "skipped: {:?}", project.skipped);
+  assert!(project.layers.iter().all(|l| !l.file_name.contains("Blank")));
+  let board = project.board.expect("board");
+  assert_eq!(board.source, BoardSource::Outline);
+  assert_eq!(board.width, 38.0);
+  // Both drill files stay listed; only the plated one is not a peg source.
+  let drills: Vec<_> = project
+    .layers
+    .iter()
+    .filter(|l| l.kind == LayerKind::Drill)
+    .map(|l| (l.file_name.as_str(), l.primitive_count))
+    .collect();
+  assert_eq!(
+    drills,
+    vec![("LaserTemplates-NPTH.drl", 4), ("LaserTemplates-PTH.drl", 4)]
+  );
+}
+
+#[test]
+fn plated_holes_are_never_peg_holes() {
+  let project = parse_project(&[file("LaserTemplates-PTH.drl", PTH)]);
+  assert_eq!(project.layers.len(), 1);
+  assert!(project.peg_holes.is_empty());
+}
+
+#[test]
+fn peg_holes_without_a_blank_file() {
+  let project = parse_project(&[file("a-NPTH.drl", NPTH), file("a-Edge_Cuts.gbr", EDGE_CUTS)]);
+  assert_eq!(project.blank, None);
+  assert_eq!(project.peg_holes.len(), 4);
+  assert!(project.skipped.is_empty());
+}
+
+#[test]
+fn non_plated_is_recognised_by_name_without_x2() {
+  let drill = "M48\nMETRIC\nT1C2.2\n%\nT1\nX1.0Y2.0\nM30\n";
+  let holes = |name: &str| parse_project(&[file(name, drill)]).peg_holes;
+  assert_eq!(holes("board-NPTH.drl"), vec![peg(1.0, 2.0)]);
+  assert!(holes("board-PTH.drl").is_empty());
+}
+
+#[test]
+fn blank_that_does_not_enclose_the_outline_is_skipped() {
+  // 30 x 30 mm, smaller than the 38 x 38 mm outline.
+  let small = BLANK_EDGE
+    .replace("X122000000", "X130000000")
+    .replace("X168000000", "X160000000")
+    .replace("Y-72000000", "Y-80000000")
+    .replace("Y-118000000", "Y-110000000");
+  let project = parse_project(&[
+    file("LaserTemplates-Blank_Edge.gbr", &small),
+    file("LaserTemplates-Edge_Cuts.gbr", EDGE_CUTS),
+  ]);
+  assert_eq!(project.blank, None);
+  assert_eq!(project.skipped.len(), 1);
+  assert_eq!(project.skipped[0].file_name, "LaserTemplates-Blank_Edge.gbr");
+  assert!(project.skipped[0].reason.contains("does not enclose"));
+  assert_eq!(project.layers.len(), 1);
+}
+
+#[test]
+fn blank_name_variants_are_recognised() {
+  for name in [
+    "Blank.Edge.gbr",
+    "LaserTemplates-Blank edge.gbr",
+    "x-blank-edge.gbr",
+    "x-BLANK_EDGE.gbr",
+  ] {
+    let project = parse_project(&[file(name, BLANK_EDGE), file("a-Edge_Cuts.gbr", EDGE_CUTS)]);
+    assert_eq!(project.blank, Some(BLANK_BOUNDS), "{name}");
+    assert!(project.skipped.is_empty(), "{name}");
+  }
+}
+
+#[test]
+fn blank_without_an_outline_is_accepted_and_extra_blanks_are_skipped() {
+  let project = parse_project(&[
+    file("a-Blank_Edge.gbr", BLANK_EDGE),
+    file("b-Blank.Edge.gbr", BLANK_EDGE),
+  ]);
+  assert_eq!(project.blank, Some(BLANK_BOUNDS));
+  assert!(project.layers.is_empty());
+  assert_eq!(project.skipped.len(), 1);
+  assert_eq!(project.skipped[0].file_name, "b-Blank.Edge.gbr");
+}
+
+#[test]
+fn unusable_blank_files_are_skipped_with_a_reason() {
+  let project = parse_project(&[file("a-Blank_Edge.gbr", "not a gerber at all")]);
+  assert_eq!(project.blank, None);
+  assert_eq!(project.skipped.len(), 1);
+  // A line has no height, so it cannot be a blank.
+  let line = gerber("%ADD10C,0.05*%\nD10*\nX0Y0D02*\nX100000Y0D01*");
+  let project = parse_project(&[file("a-Blank_Edge.gbr", &line)]);
+  assert_eq!(project.blank, None);
+  assert_eq!(project.skipped.len(), 1);
+}
+
+#[test]
+fn blank_and_peg_holes_serialise_in_camel_case() {
+  let json = serde_json::to_value(parse_project(&blank_export())).unwrap();
+  assert_eq!(json["blank"]["minX"], 122.0);
+  assert_eq!(json["blank"]["maxY"], -72.0);
+  assert_eq!(json["pegHoles"][0]["x"], 125.0);
+  assert_eq!(json["pegHoles"][0]["diameter"], 2.2);
+  let bare = serde_json::to_value(parse_project(&[file("a-NPTH.drl", NPTH)])).unwrap();
+  assert!(bare["blank"].is_null());
 }

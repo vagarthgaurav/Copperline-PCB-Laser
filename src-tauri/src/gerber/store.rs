@@ -29,6 +29,8 @@ impl ProjectStore {
         .cloned()
         .collect(),
       skipped: Vec::new(),
+      blank: project.blank,
+      peg_holes: project.peg_holes.clone(),
     })
   }
 
@@ -86,6 +88,8 @@ mod tests {
       layers: Vec::new(),
       skipped: Vec::new(),
       board: None,
+      blank: None,
+      peg_holes: Vec::new(),
     });
     assert_eq!(
       store.snapshot_layers(LayerKind::TopCopper).unwrap().name,

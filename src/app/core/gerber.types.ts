@@ -17,6 +17,13 @@ export interface Bounds {
   maxY: number;
 }
 
+/** A hole of the non-plated drill file; the pegs the board is pinned on. Millimetres. */
+export interface PegHole {
+  x: number;
+  y: number;
+  diameter: number;
+}
+
 export type BoardSource = 'outline' | 'copper';
 
 export interface BoardInfo {
@@ -71,4 +78,8 @@ export interface ParsedProject {
   skipped: SkippedFile[];
   /** Null when there are no layers. */
   board: BoardInfo | null;
+  /** The physical blank, from the blank-edge layer; null when the project has none. Same frame as the layers. */
+  blank: Bounds | null;
+  /** Every hole of the non-plated drill file, in the same frame as the layers. */
+  pegHoles: readonly PegHole[];
 }

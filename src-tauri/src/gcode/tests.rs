@@ -49,6 +49,8 @@ fn project(kind: LayerKind) -> ParsedProject {
       width: 10.0,
       height: 10.0,
     }),
+    blank: None,
+    peg_holes: Vec::new(),
   }
 }
 

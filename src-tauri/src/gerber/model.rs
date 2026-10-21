@@ -19,6 +19,18 @@ pub struct ParsedProject {
   pub layers: Vec<ParsedLayer>,
   pub skipped: Vec<SkippedFile>,
   pub board: Option<BoardInfo>,
+  /// The physical blank (centre lines of the blank-edge layer), if the project has a valid one.
+  pub blank: Option<Bounds>,
+  /// Every hole of the non-plated drill file: the pegs the board is pinned on.
+  pub peg_holes: Vec<PegHole>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PegHole {
+  pub x: f64,
+  pub y: f64,
+  pub diameter: f64,
 }
 
 #[derive(Debug, Clone, Serialize)]

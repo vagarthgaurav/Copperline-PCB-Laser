@@ -53,6 +53,30 @@ pub fn classify(name: &str, content: &str) -> Classification {
   by_name(name, excellon)
 }
 
+/// True for the blank-edge layer: `blank`, optional separators, `edge` in the
+/// file name (`Blank_Edge`, `Blank.Edge`, `Blank edge`, `blank-edge`).
+pub fn is_blank_edge_name(name: &str) -> bool {
+  let n = name.to_ascii_lowercase();
+  n.match_indices("blank").any(|(i, word)| {
+    n[i + word.len()..]
+      .trim_start_matches(['_', '.', '-', ' '])
+      .starts_with("edge")
+  })
+}
+
+/// True for a non-plated (NPTH) drill file: the X2 function says so, or there
+/// is no usable function and the name contains `npth`.
+pub fn is_non_plated(name: &str, content: &str) -> bool {
+  let main = file_attribute(content, "FileFunction")
+    .and_then(|f| f.into_iter().next())
+    .map(|f| f.to_ascii_lowercase());
+  match main.as_deref() {
+    Some("nonplated") => true,
+    Some("plated") => false,
+    _ => name.to_ascii_lowercase().contains("npth"),
+  }
+}
+
 fn by_function(function: &[String], excellon: bool) -> Option<Classification> {
   use Classification::{Layer, Skip};
   let main = function.first()?.to_ascii_lowercase();

@@ -18,6 +18,8 @@ export function parsedProject(overrides: Partial<ParsedProject> = {}): ParsedPro
     ],
     skipped: [{ fileName: 'board_v3-F_Mask.gbr', reason: 'Solder mask is not used for engraving' }],
     board: { bounds, source: 'outline', width: 80, height: 55 },
+    blank: null,
+    pegHoles: [],
     ...overrides,
   };
 }
