@@ -8,6 +8,9 @@ describe('EngravingService', () => {
     const service = create();
     expect(service.power()).toBe(65);
     expect(service.feedRate()).toBe(1200);
+    expect(service.spotDiameter()).toBe(0.1);
+    expect(service.isolationPasses()).toBe(1);
+    expect(service.passOverlap()).toBe(0.3);
   });
 
   it('clamps power to 0..100', () => {
@@ -34,7 +37,43 @@ describe('EngravingService', () => {
     const service = create();
     service.setPower(Number.NaN);
     service.setFeedRate(Number.NaN);
+    service.setSpotDiameter(Number.NaN);
+    service.setIsolationPasses(Number.POSITIVE_INFINITY);
+    service.setPassOverlap(Number.NaN);
     expect(service.power()).toBe(65);
     expect(service.feedRate()).toBe(1200);
+    expect(service.spotDiameter()).toBe(0.1);
+    expect(service.isolationPasses()).toBe(1);
+    expect(service.passOverlap()).toBe(0.3);
+  });
+
+  it('clamps the spot diameter to 0.01..1 mm', () => {
+    const service = create();
+    service.setSpotDiameter(0);
+    expect(service.spotDiameter()).toBe(0.01);
+    service.setSpotDiameter(5);
+    expect(service.spotDiameter()).toBe(1);
+    service.setSpotDiameter(0.08);
+    expect(service.spotDiameter()).toBe(0.08);
+  });
+
+  it('keeps isolation passes a whole number from 1 to 20', () => {
+    const service = create();
+    service.setIsolationPasses(0);
+    expect(service.isolationPasses()).toBe(1);
+    service.setIsolationPasses(99);
+    expect(service.isolationPasses()).toBe(20);
+    service.setIsolationPasses(3.4);
+    expect(service.isolationPasses()).toBe(3);
+  });
+
+  it('clamps the pass overlap to 0..0.9', () => {
+    const service = create();
+    service.setPassOverlap(-0.2);
+    expect(service.passOverlap()).toBe(0);
+    service.setPassOverlap(1);
+    expect(service.passOverlap()).toBe(0.9);
+    service.setPassOverlap(0.5);
+    expect(service.passOverlap()).toBe(0.5);
   });
 });

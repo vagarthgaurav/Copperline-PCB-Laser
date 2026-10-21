@@ -30,7 +30,7 @@ describe('DesignPage', () => {
   it('shows the empty G-code viewer filling the right panel', async () => {
     const el = await setup();
     const viewer = el.querySelector('app-panel:last-of-type app-gcode-viewer')!;
-    expect(viewer.textContent).toContain('No G-code yet. Load a Gerber to preview it.');
+    expect(viewer.textContent).toContain('No G-code yet. Press Generate G-code.');
     expect(viewer.querySelector('ol')).toBeNull();
   });
 
@@ -67,10 +67,45 @@ describe('DesignPage', () => {
       expect(el.querySelector('.filecard')?.textContent).toContain('4 layers · 80 × 55 mm');
       expect(el.querySelectorAll('button.layer').length).toBe(4);
       expect(el.querySelectorAll('app-placement-section app-field').length).toBe(4);
-      expect(el.querySelectorAll('app-engraving-section app-field').length).toBe(2);
+      expect(el.querySelectorAll('app-engraving-section app-field').length).toBe(5);
       expect(el.querySelectorAll('app-placement-readout app-tile').length).toBe(2);
     } finally {
       delete (window as unknown as Record<string, unknown>)['__TAURI_INTERNALS__'];
     }
+  });
+
+  describe('G-code panel while generating', () => {
+    beforeEach(() => {
+      Object.defineProperty(window, '__TAURI_INTERNALS__', { value: {}, configurable: true });
+    });
+    afterEach(() => {
+      delete (window as unknown as Record<string, unknown>)['__TAURI_INTERNALS__'];
+    });
+
+    const viewer = (el: HTMLElement) => el.querySelector('app-panel:last-of-type app-gcode-viewer')!;
+
+    it('shows the generating message while the request is in flight', async () => {
+      vi.mocked(invoke).mockImplementation((command) =>
+        command === 'generate_gcode' ? new Promise(() => {}) : Promise.resolve(parsedProject()),
+      );
+      const el = await setup();
+      await TestBed.inject(GerberService).load([new File(['x'], 'a.gbr')]);
+      await vi.waitFor(() => expect(el.querySelector('app-engraving-section button')).toBeTruthy());
+      el.querySelector<HTMLButtonElement>('app-engraving-section button')!.click();
+      await vi.waitFor(() => expect(viewer(el).textContent).toContain('Generating G-code…'));
+    });
+
+    it('shows the error text when generation fails', async () => {
+      vi.mocked(invoke).mockImplementation((command) =>
+        command === 'generate_gcode'
+          ? Promise.reject('Nothing to engrave')
+          : Promise.resolve(parsedProject()),
+      );
+      const el = await setup();
+      await TestBed.inject(GerberService).load([new File(['x'], 'a.gbr')]);
+      await vi.waitFor(() => expect(el.querySelector('app-engraving-section button')).toBeTruthy());
+      el.querySelector<HTMLButtonElement>('app-engraving-section button')!.click();
+      await vi.waitFor(() => expect(viewer(el).textContent).toContain('Nothing to engrave'));
+    });
   });
 });

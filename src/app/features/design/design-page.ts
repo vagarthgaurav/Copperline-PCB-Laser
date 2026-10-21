@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { BoardViewport } from '../../shell/board-viewport';
 import { WorkspaceLayout } from '../../shell/workspace-layout';
 import { GcodeService } from '../../core/gcode.service';
@@ -48,7 +48,7 @@ import { ProjectSection } from './project-section';
         right
         [lines]="gcode.lines()"
         (exported)="gcode.exportToFile()"
-        emptyMessage="No G-code yet. Load a Gerber to preview it."
+        [emptyMessage]="emptyMessage()"
       />
     </app-workspace-layout>
   `,
@@ -70,4 +70,10 @@ import { ProjectSection } from './project-section';
 })
 export class DesignPage {
   protected readonly gcode = inject(GcodeService);
+
+  protected readonly emptyMessage = computed(
+    () =>
+      this.gcode.error() ??
+      (this.gcode.generating() ? 'Generating G-code…' : 'No G-code yet. Press Generate G-code.'),
+  );
 }
