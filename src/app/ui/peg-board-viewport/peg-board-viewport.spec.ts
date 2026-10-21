@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { floorBounds } from '../../core/peg-board';
 import { ThemeService } from '../../core/theme.service';
 import { PegBoardViewport, VIEW_HINT, WEBGL_UNAVAILABLE_MESSAGE } from './peg-board-viewport';
 import { PEG_BOARD_SCENE_FACTORY } from './scene-factory';
@@ -52,6 +53,8 @@ function geometry(width = 80, height = 55): BoardGeometry {
     copper: new Float32Array(),
     outline: [],
     holes: [],
+    blank: null,
+    pegHoles: [],
   };
 }
 
@@ -372,7 +375,8 @@ describe('PegBoardViewport', () => {
     });
 
     it('warns when the board extends past the floor', async () => {
-      await setup({ geometry: geometry(), offsetX: 110 });
+      // The 80 mm wide board overhangs the right edge of the floor by 10 mm.
+      await setup({ geometry: geometry(), offsetX: floorBounds().maxX - 70 });
       expect(chip().textContent?.trim()).toBe('Board extends past the peg board');
       expect(chip().getAttribute('data-kind')).toBe('warn');
       set({ offsetX: 0, offsetY: -25 });
@@ -381,8 +385,12 @@ describe('PegBoardViewport', () => {
     });
 
     it('swaps width and height for odd quarter turns', async () => {
-      // 150 x 40 fits; turned a quarter it is 40 x 150 and the floor tops out at y 130.
-      await setup({ geometry: geometry(150, 40), offsetX: 0, offsetY: 0 });
+      // 150 x 40 fits 100 mm under the top of the floor; turned a quarter it is 40 x 150 and overhangs.
+      await setup({
+        geometry: geometry(150, 40),
+        offsetX: 0,
+        offsetY: floorBounds().maxY - 100,
+      });
       expect(chip().getAttribute('data-kind')).toBe('ok');
       set({ quarterTurns: 1 });
       await fixture.whenStable();
@@ -457,6 +465,19 @@ describe('PegBoardViewport', () => {
       ]);
     });
 
+    it('steps by the snap pitch, with or without Shift, and says so in the chip', async () => {
+      await setup({ geometry: geometry(), offsetX: 1, offsetY: 1, snapPitch: 10 });
+      const changes: { x: number; y: number }[] = [];
+      fixture.componentInstance.offsetChange.subscribe((value) => changes.push(value));
+      key(frame(), { key: 'ArrowRight' });
+      key(frame(), { key: 'ArrowDown', shiftKey: true });
+      expect(changes).toEqual([
+        { x: 11, y: 1 },
+        { x: 1, y: -9 },
+      ]);
+      expect(chip().textContent).toContain('arrow keys step 10 mm');
+    });
+
     it('ignores other keys and Meta-modified arrows, and never nudges for Alt or Ctrl arrows', async () => {
       await setup();
       const changes = vi.fn();
@@ -514,6 +535,26 @@ describe('PegBoardViewport', () => {
       expect(changes).toEqual([{ x: 22.35, y: 3.5 }]);
       await fixture.whenStable();
       expect(canvas().style.cursor).toBe('grabbing');
+    });
+
+    it('compares against the offset input, so a consumer that snaps it keeps receiving the drag', async () => {
+      await setupDrag({ snapPitch: 10 });
+      scene().floorPoint.mockReturnValueOnce({ x: 40, y: 30 });
+      pointer('pointerdown', 150, 100);
+      // The consumer snaps these back to the unchanged (10, 5), so the input stays put.
+      scene().floorPoint.mockReturnValue({ x: 42, y: 30 });
+      pointer('pointermove', 160, 100);
+      scene().floorPoint.mockReturnValue({ x: 43, y: 30 });
+      pointer('pointermove', 170, 100);
+      expect(changes).toEqual([
+        { x: 12, y: 5 },
+        { x: 13, y: 5 },
+      ]);
+      // Once the input has caught up with the pointer, nothing more is emitted.
+      fixture.componentRef.setInput('offsetX', 20);
+      scene().floorPoint.mockReturnValue({ x: 50, y: 30 });
+      pointer('pointermove', 180, 100);
+      expect(changes.length).toBe(2);
     });
 
     it('stops on pointer up and releases capture', async () => {

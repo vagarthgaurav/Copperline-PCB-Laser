@@ -29,6 +29,7 @@ export type ViewportMode = 'design' | 'simulate' | 'machine';
       [doneLine]="doneLine()"
       [tool]="tool()"
       [interactive]="mode() === 'design'"
+      [snapPitch]="placement.snapPitch()"
       [side]="placement.side()"
       (sideChange)="placement.setSide($event)"
       (offsetChange)="placement.setOffset($event.x, $event.y)"

@@ -91,6 +91,8 @@ export class PegBoardViewport {
   readonly tool = input<{ x: number; y: number } | null>(null);
   /** False hides the board tools and disables moving the board and arrow-key nudging; the camera still moves. */
   readonly interactive = input(true);
+  /** Peg-grid pitch in mm when the consumer snaps the board to it; arrow keys then step by it. */
+  readonly snapPitch = input<number | null>(null);
   /** Replaces the default status chip text. */
   readonly status = input<string>();
 
@@ -169,6 +171,11 @@ export class PegBoardViewport {
     );
   });
 
+  private readonly keyHint = computed(() => {
+    const pitch = this.snapPitch();
+    return pitch === null ? 'nudge 1 mm' : `step ${pitch} mm`;
+  });
+
   protected readonly chip = computed<{ kind: ChipKind; icon: IconName; text: string }>(() => {
     const custom = this.status();
     if (custom) {
@@ -184,7 +191,7 @@ export class PegBoardViewport {
       kind: 'ok',
       icon: 'check-circle',
       text: this.interactive()
-        ? 'Board fits the peg grid · drag to move, arrow keys nudge 1 mm'
+        ? `Board fits the peg grid · drag to move, arrow keys ${this.keyHint()}`
         : 'Board on the peg board',
     };
   });
@@ -318,7 +325,9 @@ export class PegBoardViewport {
     if (!this.interactive() || event.ctrlKey || event.altKey) {
       return;
     }
-    const step = event.shiftKey ? NUDGE_FINE : NUDGE;
+    // Shift's finer step would be snapped away, so a snapping board always steps one pitch.
+    const pitch = this.snapPitch();
+    const step = pitch ?? (event.shiftKey ? NUDGE_FINE : NUDGE);
     let dx = 0;
     let dy = 0;
     switch (event.key) {
