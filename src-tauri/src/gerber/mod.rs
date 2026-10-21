@@ -5,13 +5,15 @@ pub mod archive;
 mod classify;
 mod excellon;
 mod expr;
-mod geometry;
+pub(crate) mod geometry;
 mod macros;
-mod model;
+pub(crate) mod model;
 mod project;
 mod rs274x;
+mod store;
 
 pub use model::{InputFile, ParsedProject};
+pub use store::ProjectStore;
 
 use classify::{Classification, Format, classify};
 use geometry::primitives_bounds;
@@ -19,10 +21,16 @@ use model::{Geometry, LayerKind, ParsedLayer, SkippedFile};
 use std::panic::{AssertUnwindSafe, catch_unwind};
 
 #[tauri::command]
-pub async fn parse_gerber_files(files: Vec<InputFile>) -> Result<ParsedProject, String> {
-  tauri::async_runtime::spawn_blocking(move || parse_project(&files))
+pub async fn parse_gerber_files(
+  files: Vec<InputFile>,
+  store: tauri::State<'_, ProjectStore>,
+) -> Result<ParsedProject, String> {
+  let project = tauri::async_runtime::spawn_blocking(move || parse_project(&files))
     .await
-    .map_err(|e| e.to_string())
+    .map_err(|e| e.to_string())?;
+  // Rust keeps the parsed project so G-code generation needs no geometry from the UI.
+  store.set(project.clone());
+  Ok(project)
 }
 
 /// Parses a set of files into layers. Never fails: unusable files are
