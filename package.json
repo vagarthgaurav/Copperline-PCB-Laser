@@ -9,7 +9,12 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "tokens": "node scripts/build-tokens.mjs"
+    "tokens": "node scripts/build-tokens.mjs",
+    "kiosk": "ng serve kiosk",
+    "kiosk:build": "ng build kiosk",
+    "kiosk:test": "ng test kiosk",
+    "tauri:kiosk": "tauri dev --config src-tauri/tauri.kiosk.conf.json",
+    "tauri:kiosk:build": "tauri build --config src-tauri/tauri.kiosk.conf.json --bundles deb"
   },
   "private": true,
   "packageManager": "pnpm@11.25.0",

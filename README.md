@@ -57,3 +57,7 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Kiosk (Raspberry Pi touch display)
+
+A second app in this workspace, `projects/kiosk`, is the operator version for the 7 inch Raspberry Pi touch display. See [projects/kiosk/README.md](projects/kiosk/README.md).

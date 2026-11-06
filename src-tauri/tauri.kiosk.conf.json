@@ -1,0 +1,28 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Copperline Kiosk",
+  "identifier": "com.vagarth.pcblaser.kiosk",
+  "build": {
+    "frontendDist": "../dist/kiosk/browser",
+    "devUrl": "http://localhost:4300",
+    "beforeDevCommand": "pnpm kiosk",
+    "beforeBuildCommand": "pnpm kiosk:build"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Copperline",
+        "decorations": false,
+        "fullscreen": true,
+        "width": 800,
+        "height": 480,
+        "resizable": false
+      }
+    ]
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["deb"]
+  }
+}

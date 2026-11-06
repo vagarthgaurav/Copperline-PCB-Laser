@@ -30,7 +30,10 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles/tokens.css", "src/styles.scss"]
+            "styles": [
+              "src/styles/tokens.css",
+              "src/styles.scss"
+            ]
           },
           "configurations": {
             "production": {
@@ -72,6 +75,83 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "isolate": true
+          }
+        }
+      }
+    },
+    "kiosk": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/kiosk",
+      "sourceRoot": "projects/kiosk/src",
+      "prefix": "kiosk",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "projects/kiosk/src/main.ts",
+            "index": "projects/kiosk/src/index.html",
+            "tsConfig": "projects/kiosk/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
+            "styles": [
+              "src/styles/tokens.css",
+              "projects/kiosk/src/styles.scss"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "port": 4300
+          },
+          "configurations": {
+            "production": {
+              "buildTarget": "kiosk:build:production"
+            },
+            "development": {
+              "buildTarget": "kiosk:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "isolate": true,
+            "tsConfig": "projects/kiosk/tsconfig.spec.json"
           }
         }
       }

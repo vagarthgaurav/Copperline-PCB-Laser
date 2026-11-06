@@ -219,4 +219,89 @@ describe('MachineService serial link', () => {
     expect(service.jobState()).toBe('idle');
     await service.disconnect();
   });
+
+  describe('job streaming', () => {
+    async function connected(lines: string[]) {
+      invoke.mockImplementation(async (cmd: string) => (cmd === 'list_serial_ports' ? [] : undefined));
+      const service = await create();
+      const { GcodeService: Gcode } = await import('./gcode.service');
+      TestBed.inject(Gcode).setLines(lines);
+      service.selectPort('/dev/ttyACM0');
+      await service.connect();
+      handlers.get('serial-line')!({ payload: '<Idle|MPos:0.000,0.000,0.000|FS:0,0>' });
+      invoke.mockClear();
+      return { service, gcode: TestBed.inject(Gcode) };
+    }
+    const reply = (payload: string) => handlers.get('serial-line')!({ payload });
+    const written = () =>
+      invoke.mock.calls.filter(([cmd]) => cmd === 'serial_write').map(([, args]) => (args as { data: string }).data);
+
+    it('sends the program, tracks progress and finishes on the last ok', async () => {
+      const { service, gcode } = await connected(['G21', 'G90', '; note', 'G1 X1 Y1 F100']);
+      service.start();
+      await vi.waitFor(() => expect(written()).toEqual(['G21\nG90\nG1 X1 Y1 F100\n']));
+      expect(service.jobState()).toBe('running');
+      expect(service.job()?.lines).toBe(4);
+
+      reply('ok');
+      expect(gcode.currentLine()).toBe(1);
+      reply('ok');
+      expect(service.progress()).toBeGreaterThan(0);
+      reply('ok');
+      expect(service.jobState()).toBe('idle');
+      expect(service.job()).toBeNull();
+      expect(service.jobResult()).toEqual({ kind: 'completed' });
+      expect(gcode.currentLine()).toBe(4);
+      await service.disconnect();
+    });
+
+    it('feeds more lines as answers free the buffer', async () => {
+      const lines = Array.from({ length: 40 }, (_, i) => `G1 X${i}.000 Y${i}.000`);
+      const { service } = await connected(lines);
+      service.start();
+      await vi.waitFor(() => expect(written()).toHaveLength(1));
+      reply('ok');
+      reply('ok');
+      await vi.waitFor(() => expect(written().length).toBeGreaterThan(1));
+      await service.disconnect();
+    });
+
+    it('stops the job when the machine reports an error', async () => {
+      const { service } = await connected(['G21', 'G1 X999']);
+      service.start();
+      await vi.waitFor(() => expect(written()).toHaveLength(1));
+      reply('ok');
+      reply('error:20');
+      expect(service.jobState()).toBe('idle');
+      expect(service.jobResult()).toMatchObject({ kind: 'failed' });
+      await vi.waitFor(() => expect(invoke).toHaveBeenCalledWith('serial_write_realtime', { byte: 0x18 }));
+      await service.disconnect();
+    });
+
+    it('pauses with a feed hold, resumes, and stops with a hold then a reset', async () => {
+      const { service } = await connected(['G21', 'G1 X1']);
+      service.start();
+      await vi.waitFor(() => expect(written()).toHaveLength(1));
+      service.pause();
+      expect(service.jobState()).toBe('paused');
+      expect(invoke).toHaveBeenCalledWith('serial_write_realtime', { byte: 0x21 });
+      service.pause();
+      expect(service.jobState()).toBe('running');
+      expect(invoke).toHaveBeenCalledWith('serial_write_realtime', { byte: 0x7e });
+
+      service.stop();
+      expect(service.jobState()).toBe('idle');
+      expect(service.jobResult()).toEqual({ kind: 'stopped' });
+      await vi.waitFor(() => expect(invoke).toHaveBeenCalledWith('serial_write_realtime', { byte: 0x18 }));
+      await service.disconnect();
+    });
+
+    it('does not start without G-code', async () => {
+      const { service } = await connected([]);
+      service.start();
+      expect(written()).toEqual([]);
+      expect(service.jobState()).toBe('idle');
+      await service.disconnect();
+    });
+  });
 });

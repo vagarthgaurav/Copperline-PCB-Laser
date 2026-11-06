@@ -3,6 +3,8 @@ import { invoke } from '@tauri-apps/api/core';
 import { UnlistenFn, listen } from '@tauri-apps/api/event';
 import { MachineStatus } from '../ui/status-chip/status-chip';
 import { GcodeService } from './gcode.service';
+import { SentLine, nextBatch } from './job-stream';
+import { PlacementService } from './placement.service';
 import {
   describeAlarm,
   describeError,
@@ -28,6 +30,11 @@ export const SETTINGS_REPLY_MS = 3000;
 /** grblHAL real-time bytes. */
 const RT_STATUS = 0x3f;
 const RT_SOFT_RESET = 0x18;
+const RT_FEED_HOLD = 0x21;
+const RT_RESUME = 0x7e;
+
+/** Pause between the feed hold and the reset that ends a stopped job, so the head decelerates first (ms). */
+export const STOP_SETTLE_MS = 300;
 
 function messageOf(error: unknown): string {
   return typeof error === 'string' ? error : error instanceof Error ? error.message : 'Unknown error';
@@ -45,6 +52,20 @@ export function jogCommand(axis: JogAxis, distance: number, feed: number): strin
 }
 
 export type JobState = 'idle' | 'running' | 'paused';
+
+/** How the last job ended, for the screen that started it. */
+export type JobResult = { kind: 'completed' } | { kind: 'stopped' } | { kind: 'failed'; message: string };
+
+/** Program lines being streamed; null when no job runs. */
+interface Stream {
+  lines: readonly string[];
+  cursor: number;
+  inFlight: SentLine[];
+  acked: number;
+  /** Set once every line was sent; the job ends when the last answer arrives. */
+  total: number;
+  startedAt: number;
+}
 
 export interface MachinePosition {
   x: number;
@@ -81,6 +102,7 @@ export interface MachineState {
 @Service()
 export class MachineService {
   private readonly gcode = inject(GcodeService);
+  private readonly placement = inject(PlacementService);
 
   private readonly _ports = signal<string[]>([]);
   private readonly _port = signal('');
@@ -96,6 +118,9 @@ export class MachineService {
   private readonly _jogFeed = signal(1000);
   private readonly _error = signal<string | null>(null);
   private readonly _busy = signal(false);
+  private readonly _jobResult = signal<JobResult | null>(null);
+  private stream: Stream | null = null;
+  private pumping = false;
   private unlisten: UnlistenFn[] = [];
   private readonly _settings = signal<Record<number, string>>({});
   private readonly _settingsLoading = signal(false);
@@ -110,6 +135,8 @@ export class MachineService {
   readonly job = this._job.asReadonly();
   readonly consoleLines = this._consoleLines.asReadonly();
   readonly jobState = this._jobState.asReadonly();
+  /** How the most recent job ended; null before the first job and while one runs. */
+  readonly jobResult = this._jobResult.asReadonly();
   /** The state grblHAL last reported (`Idle`, `Run`, `Alarm`, ...), or null before the first report. */
   readonly machineState = this._machineState.asReadonly();
   /** True while the machine reports an alarm: it is locked and refuses motion until unlocked. */
@@ -270,6 +297,10 @@ export class MachineService {
       return;
     }
     this.log('> Emergency stop (soft reset)');
+    if (this.stream !== null) {
+      this.stream = null;
+      this._jobResult.set({ kind: 'stopped' });
+    }
     this._jobState.set('idle');
     this._job.set(null);
     await this.sendRealtime(RT_SOFT_RESET);
@@ -336,6 +367,14 @@ export class MachineService {
   }
 
   private onLine(line: string): void {
+    if (this.stream !== null) {
+      const isOk = line.trim() === 'ok';
+      const error = isOk ? null : parseErrorCode(line);
+      if (isOk || error !== null) {
+        this.onStreamReply(error);
+        return;
+      }
+    }
     const waiter = this.replyWaiter;
     if (waiter !== null) {
       if (line.trim() === 'ok') {
@@ -374,6 +413,12 @@ export class MachineService {
     if (code !== null) {
       this._alarmCode.set(code);
       this._machineState.set('Alarm');
+      if (this.stream !== null) {
+        this.stream = null;
+        this._jobState.set('idle');
+        this._job.set(null);
+        this._jobResult.set({ kind: 'failed', message: describeAlarm(code) });
+      }
     }
     this.log(line);
   }
@@ -416,22 +461,142 @@ export class MachineService {
     this._settings.set({});
     this._settingsLoading.set(false);
     this.replyWaiter?.({ error: 3 });
+    if (this.stream !== null) {
+      this.stream = null;
+      this._job.set(null);
+      this._jobResult.set({ kind: 'failed', message: 'The connection to the machine was lost.' });
+    }
     this._connection.set('disconnected');
     this._jobState.set('idle');
     this._position.set(null);
     await this.refreshPorts();
   }
 
+  /** Streams the G-code to the machine. Does nothing unless `canStart()`. */
   start(): void {
-    // TODO(serial): implemented by the Rust serial commands
+    if (!this.canStart()) {
+      return;
+    }
+    const lines = this.gcode.lines();
+    this.stream = { lines, cursor: 0, inFlight: [], acked: 0, total: lines.length, startedAt: Date.now() };
+    this._jobResult.set(null);
+    this._jobState.set('running');
+    this.gcode.setCurrentLine(0);
+    this.publishProgress();
+    this.log(`Job started: ${lines.length} lines`);
+    void this.pump();
   }
 
+  /** Feed hold, or resume when already held. Motion stops within the machine's deceleration. */
   pause(): void {
-    // TODO(serial): implemented by the Rust serial commands
+    if (this.stream === null) {
+      return;
+    }
+    if (this._jobState() === 'running') {
+      this._jobState.set('paused');
+      void this.sendRealtime(RT_FEED_HOLD);
+    } else if (this._jobState() === 'paused') {
+      this._jobState.set('running');
+      void this.sendRealtime(RT_RESUME);
+    }
   }
 
+  /** Ends the job: feed hold, then a soft reset that switches the laser off. The machine keeps its position. */
   stop(): void {
-    // TODO(serial): implemented by the Rust serial commands
+    if (this.stream === null) {
+      return;
+    }
+    void this.haltJob({ kind: 'stopped' });
+  }
+
+  private async haltJob(result: JobResult): Promise<void> {
+    this.stream = null;
+    this._jobResult.set(result);
+    this._jobState.set('idle');
+    this._job.set(null);
+    this.log(result.kind === 'failed' ? `Job failed: ${result.message}` : 'Job stopped');
+    await this.sendRealtime(RT_FEED_HOLD);
+    await new Promise((resolve) => setTimeout(resolve, STOP_SETTLE_MS));
+    await this.sendRealtime(RT_SOFT_RESET);
+  }
+
+  /** Sends what fits in the receive buffer. Runs again after every answer from the machine. */
+  private async pump(): Promise<void> {
+    if (this.pumping) {
+      return;
+    }
+    this.pumping = true;
+    try {
+      for (let stream = this.stream; stream !== null; stream = this.stream) {
+        const inFlight = stream.inFlight.reduce((sum, line) => sum + line.bytes, 0);
+        const batch = nextBatch(stream.lines, stream.cursor, inFlight);
+        if (batch.text === '') {
+          break;
+        }
+        stream.cursor = batch.cursor;
+        stream.inFlight.push(...batch.sent);
+        await invoke('serial_write', { data: batch.text });
+      }
+      this.finishIfDone();
+    } catch (error) {
+      if (this.stream !== null) {
+        void this.haltJob({ kind: 'failed', message: messageOf(error) });
+      }
+    } finally {
+      this.pumping = false;
+    }
+  }
+
+  /** One `ok` or `error:n` answers the oldest line in flight. */
+  private onStreamReply(error: number | null): void {
+    const stream = this.stream;
+    if (stream === null) {
+      return;
+    }
+    const done = stream.inFlight.shift();
+    if (done !== undefined) {
+      stream.acked = done.index + 1;
+    }
+    this.publishProgress();
+    if (error !== null) {
+      const line = done === undefined ? '' : ` on line ${done.index + 1}`;
+      void this.haltJob({ kind: 'failed', message: `${describeError(error)}${line}` });
+      return;
+    }
+    if (!this.finishIfDone()) {
+      void this.pump();
+    }
+  }
+
+  private finishIfDone(): boolean {
+    const stream = this.stream;
+    if (stream === null || stream.cursor < stream.total || stream.inFlight.length > 0) {
+      return false;
+    }
+    this.stream = null;
+    this.gcode.setCurrentLine(stream.total);
+    this._job.set(null);
+    this._jobState.set('idle');
+    this._jobResult.set({ kind: 'completed' });
+    this.log('Job finished');
+    return true;
+  }
+
+  private publishProgress(): void {
+    const stream = this.stream;
+    if (stream === null) {
+      return;
+    }
+    this.gcode.setCurrentLine(stream.acked);
+    const fraction = stream.total > 0 ? stream.acked / stream.total : 0;
+    const estimate = this.gcode.stats()?.estimatedSeconds ?? 0;
+    this._job.set({
+      name: 'Board',
+      side: this.placement.side() === 'top' ? 'Top' : 'Bottom',
+      line: stream.acked,
+      lines: stream.total,
+      etaSeconds: Math.max(0, Math.round(estimate * (1 - fraction))),
+    });
   }
 
   /** Runs the homing cycle (`$H`). */

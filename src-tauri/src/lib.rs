@@ -1,8 +1,10 @@
 use tauri::Manager;
 
+mod admin;
 mod gcode;
 mod gerber;
 mod serial;
+mod usb;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -33,7 +35,11 @@ pub fn run() {
       serial::serial_connect,
       serial::serial_disconnect,
       serial::serial_write,
-      serial::serial_write_realtime
+      serial::serial_write_realtime,
+      usb::list_usb_drives,
+      usb::list_usb_dir,
+      usb::read_usb_file,
+      admin::verify_admin_password
     ])
     .run(tauri::generate_context!())
     .expect("error while building tauri application");

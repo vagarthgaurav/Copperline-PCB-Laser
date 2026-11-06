@@ -1,0 +1,37 @@
+@use '../../../src/styles/fonts';
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+kiosk-root {
+  display: block;
+  height: 100%;
+}
+
+body {
+  background: var(--surface-100);
+  color: var(--ink);
+  font: 16px/22px var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  /* A touch screen: no text selection, no long-press menu, no double-tap zoom. */
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Finger-sized targets: the shared Button is 36px, too small for a thumb on a 7 inch screen. */
+button[appButton][data-size] {
+  min-height: 52px;
+  min-width: 52px;
+  font-size: 16px;
+}
