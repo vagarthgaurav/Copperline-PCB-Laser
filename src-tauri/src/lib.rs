@@ -2,11 +2,13 @@ use tauri::Manager;
 
 mod gcode;
 mod gerber;
+mod serial;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
     .manage(gerber::ProjectStore::default())
+    .manage(serial::SerialStore::default())
     .setup(|app| {
       if cfg!(debug_assertions) {
         app.handle().plugin(
@@ -26,7 +28,12 @@ pub fn run() {
     .invoke_handler(tauri::generate_handler![
       gerber::parse_gerber_files,
       gerber::archive::read_gerber_zip,
-      gcode::generate_gcode
+      gcode::generate_gcode,
+      serial::list_serial_ports,
+      serial::serial_connect,
+      serial::serial_disconnect,
+      serial::serial_write,
+      serial::serial_write_realtime
     ])
     .run(tauri::generate_context!())
     .expect("error while building tauri application");

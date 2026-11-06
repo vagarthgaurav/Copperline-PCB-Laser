@@ -1,38 +1,55 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { MachineService } from '../../core/machine.service';
 import { EmptyNote } from '../../shell/empty-note';
-
-/** Number of machine output lines kept on screen. */
-export const CONSOLE_LINES = 4;
+import { Button } from '../../ui/button/button';
+import { Field, FieldValue } from '../../ui/field/field';
 
 /**
- * Last lines of machine output in a polite live region. It never takes
- * focus, so new lines are announced without moving the user.
+ * Machine console: a scrolling log of what was sent (`> ...`) and what came
+ * back, and a command line. The log is a polite live region and scrolls to
+ * the newest line; it never takes focus on its own. It is focusable so a
+ * keyboard user can scroll it.
  */
 @Component({
   selector: 'app-console-log',
-  imports: [EmptyNote],
+  imports: [EmptyNote, Field, Button],
   template: `
-    <div class="well" role="log" aria-label="Machine console">
+    <div #well class="well" role="log" aria-label="Machine console" tabindex="0">
       @for (line of lines(); track $index) {
-        <p class="line" [class.status]="line.startsWith('<')">{{ line }}</p>
+        <p class="line" [class.sent]="line.startsWith('> ')" [class.status]="line.startsWith('<')">{{ line }}</p>
       } @empty {
         <app-empty-note>No machine output yet.</app-empty-note>
       }
     </div>
+    <form class="send" (submit)="onSubmit($event)">
+      <app-field
+        kind="text"
+        label="Command"
+        placeholder="$$ or G0 X10"
+        [value]="command()"
+        [disabled]="!connected()"
+        (valueChange)="onCommand($event)"
+      />
+      <button appButton type="submit" size="sm" [disabled]="!connected() || command().trim() === ''">
+        Send
+      </button>
+    </form>
   `,
   styles: `
     :host {
-      display: block;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
     }
 
     .well {
       box-sizing: border-box;
+      height: 240px;
       padding: 10px var(--space-3);
       background: var(--surface-sunken);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      overflow: hidden;
+      overflow: auto;
     }
 
     .line {
@@ -41,18 +58,58 @@ export const CONSOLE_LINES = 4;
       font-size: 11.5px;
       line-height: 18px;
       color: var(--ink-muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
     }
 
     .line.status {
       color: var(--ink);
     }
+
+    .line.sent {
+      color: var(--accent-strong);
+    }
+
+    .send {
+      display: flex;
+      align-items: flex-end;
+      gap: var(--space-2);
+    }
+
+    .send app-field {
+      flex: 1;
+      min-width: 0;
+    }
   `,
 })
 export class ConsoleLog {
   private readonly machine = inject(MachineService);
+  private readonly well = viewChild.required<ElementRef<HTMLElement>>('well');
 
-  protected readonly lines = computed(() => this.machine.consoleLines().slice(-CONSOLE_LINES));
+  protected readonly lines = this.machine.consoleLines;
+  protected readonly connected = computed(() => this.machine.connection() === 'connected');
+  protected readonly command = signal('');
+
+  constructor() {
+    effect(() => {
+      this.lines();
+      const el = this.well().nativeElement;
+      // Wait for the new line to render, then follow it.
+      queueMicrotask(() => (el.scrollTop = el.scrollHeight));
+    });
+  }
+
+  protected onCommand(value: FieldValue): void {
+    this.command.set(typeof value === 'string' ? value : '');
+  }
+
+  protected onSubmit(event: Event): void {
+    event.preventDefault();
+    const command = this.command().trim();
+    if (command === '' || !this.connected()) {
+      return;
+    }
+    void this.machine.send(command);
+    this.command.set('');
+  }
 }

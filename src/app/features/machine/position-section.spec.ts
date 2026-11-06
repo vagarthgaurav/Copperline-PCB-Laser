@@ -12,20 +12,20 @@ describe('PositionSection', () => {
     return { el, values };
   }
 
-  it('shows X, Y and Z in mm while connected', () => {
+  it('shows X and Y in mm while connected', () => {
     const { el, values } = setup({ connection: 'connected', position: { x: 72.5, y: 95.4, z: 0 } });
     expect(el.querySelector('[role="group"]')?.getAttribute('aria-label')).toBe('Laser position in millimetres');
-    expect(Array.from(el.querySelectorAll('dt')).map((dt) => dt.textContent)).toEqual(['X', 'Y', 'Z']);
-    expect(values).toEqual(['072.50 mm', '095.40 mm', '000.00 mm']);
+    expect(Array.from(el.querySelectorAll('dt')).map((dt) => dt.textContent)).toEqual(['X', 'Y']);
+    expect(values).toEqual(['072.50', '095.40']);
   });
 
   it('shows em dashes when disconnected, even with a stale position', () => {
     const { values } = setup({ connection: 'disconnected', position: { x: 72.5, y: 95.4, z: 0 } });
-    expect(values).toEqual(['— mm', '— mm', '— mm']);
+    expect(values).toEqual(['—', '—']);
   });
 
   it('shows em dashes when connected without a position', () => {
     const { values } = setup({ connection: 'connected', position: null });
-    expect(values).toEqual(['— mm', '— mm', '— mm']);
+    expect(values).toEqual(['—', '—']);
   });
 });

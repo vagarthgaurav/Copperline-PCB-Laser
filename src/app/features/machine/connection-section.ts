@@ -17,6 +17,7 @@ import { StatusChip } from '../../ui/status-chip/status-chip';
       [value]="machine.port()"
       [disabled]="selectDisabled()"
       [help]="help()"
+      [error]="machine.error() ?? undefined"
       (valueChange)="onPort($event)"
     />
     <div class="row">
@@ -25,12 +26,12 @@ import { StatusChip } from '../../ui/status-chip/status-chip';
         [detail]="machine.connection() === 'connected' ? machine.port() : undefined"
       />
       @if (connected()) {
-        <button appButton size="sm" (click)="machine.disconnect()">
+        <button appButton size="sm" [disabled]="machine.busy()" (click)="machine.disconnect()">
           <app-icon name="plugs" [size]="16" />
           Disconnect
         </button>
       } @else {
-        <button appButton size="sm" [disabled]="!machine.port()" (click)="machine.connect()">
+        <button appButton size="sm" [disabled]="!machine.port() || machine.busy()" (click)="machine.connect()">
           <app-icon name="plugs-connected" [size]="16" />
           Connect
         </button>
@@ -54,6 +55,10 @@ import { StatusChip } from '../../ui/status-chip/status-chip';
 })
 export class ConnectionSection {
   protected readonly machine = inject(MachineService);
+
+  constructor() {
+    void this.machine.refreshPorts();
+  }
 
   protected readonly connected = computed(() => this.machine.connection() === 'connected');
 

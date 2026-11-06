@@ -17,7 +17,7 @@ describe('MachinePage', () => {
     const { el } = await setup();
     const [left, right] = Array.from(el.querySelectorAll('app-panel'));
     const headings = (panel: Element) => Array.from(panel.querySelectorAll('h2')).map((h) => h.textContent?.trim());
-    expect(headings(left)).toEqual(['Connection', 'Position', 'Job', 'Console']);
+    expect(headings(left)).toEqual(['Connection', 'Position', 'Jog', 'Job', 'Console']);
     expect(headings(right)).toEqual(['Current move', 'G-code']);
     expect(left.textContent).toContain('No serial ports found. Plug in the machine and reopen this screen.');
     expect(left.textContent).toContain('No job running. Load a Gerber in Design to prepare one.');
@@ -39,8 +39,10 @@ describe('MachinePage', () => {
 
   it('shows dashes for the position and current move when nothing is known', async () => {
     const { el } = await setup();
-    const values = Array.from(el.querySelectorAll('app-tile dd')).map((dd) => dd.textContent?.replace(/\s+/g, ' ').trim());
-    expect(values).toEqual(['— mm', '— mm', '— mm', '— mm', '— mm']);
+    const values = Array.from(el.querySelectorAll('app-position-section dd, app-tile dd')).map((dd) =>
+      dd.textContent?.replace(/\s+/g, ' ').trim(),
+    );
+    expect(values).toEqual(['—', '—', '— mm', '— mm']);
   });
 
   it('shows the current move from the G-code service', async () => {
@@ -67,6 +69,6 @@ describe('MachinePage', () => {
     });
     harness.detectChanges();
     expect(el.textContent).toContain('Connected');
-    expect(el.textContent).toContain('001.00 mm');
+    expect(el.textContent).toContain('001.00');
   });
 });

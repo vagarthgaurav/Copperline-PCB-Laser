@@ -98,4 +98,15 @@ describe('JobBar', () => {
     const { el } = setup({ connection: 'connected' });
     expect(el.querySelectorAll('button[data-variant="primary"]').length).toBe(1);
   });
+
+  it('has an emergency stop that works whenever connected, and unlock only in alarm', () => {
+    const { button } = setup({ connection: 'connected', jobState: 'running', job: JOB });
+    expect(button('Emergency stop').disabled).toBe(false);
+    expect(button('Unlock alarm').disabled).toBe(true);
+  });
+
+  it('disables a disconnected emergency stop', () => {
+    const { button } = setup({ connection: 'disconnected' });
+    expect(button('Emergency stop').disabled).toBe(true);
+  });
 });

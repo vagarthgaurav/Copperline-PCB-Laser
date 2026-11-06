@@ -15,12 +15,23 @@ import { formatEta, formatLineOf } from './machine-format';
   imports: [Button, Icon, Banner],
   template: `
     <section aria-label="Job controls">
+      @if (machine.alarm()) {
+        <app-banner severity="error" [message]="'Machine in alarm. ' + machine.alarmText() + ' Unlock to continue.'" />
+      }
       @if (noGcode()) {
         <app-banner message="There is no G-code to engrave. Load a Gerber in Design to generate it." />
       }
 
       <div class="row">
         <div class="group">
+          <button appButton variant="danger" [disabled]="!connected()" (click)="machine.emergencyStop()">
+            <app-icon name="warning" />
+            Emergency stop
+          </button>
+          <button appButton [disabled]="!machine.alarm()" (click)="machine.unlock()">
+            <app-icon name="plug" />
+            Unlock alarm
+          </button>
           <button appButton [disabled]="!jobActive()" (click)="machine.pause()">
             <app-icon [name]="paused() ? 'play' : 'pause'" />
             {{ paused() ? 'Resume' : 'Pause' }}
@@ -65,9 +76,9 @@ export class JobBar {
   private readonly gcode = inject(GcodeService);
 
   protected readonly connected = computed(() => this.machine.connection() === 'connected');
-  protected readonly jobActive = computed(() => this.connected() && this.machine.jobState() !== 'idle');
+  protected readonly jobActive = computed(() => this.connected() && this.machine.jobState() !== 'idle' && !this.machine.alarm());
   protected readonly paused = computed(() => this.machine.jobState() === 'paused');
-  protected readonly canHome = computed(() => this.connected() && this.machine.jobState() === 'idle');
+  protected readonly canHome = this.machine.canMove;
 
   /** A real blocker: the machine is ready but there is nothing to send. */
   protected readonly noGcode = computed(

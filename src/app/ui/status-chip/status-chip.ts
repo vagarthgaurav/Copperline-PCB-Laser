@@ -9,7 +9,7 @@ const STATUS_META: Record<MachineStatus, { icon: IconName; label: string }> = {
   disconnected: { icon: 'plugs', label: 'Disconnected' },
   engraving: { icon: 'crosshair', label: 'Engraving' },
   paused: { icon: 'pause', label: 'Paused' },
-  fault: { icon: 'warning', label: 'Fault' },
+  fault: { icon: 'warning', label: 'Alarm' },
 };
 
 /**

@@ -7,6 +7,7 @@ import { PanelSection } from '../../ui/panel/panel-section';
 import { Tile } from '../../ui/tile/tile';
 import { ConnectionSection } from './connection-section';
 import { ConsoleLog } from './console-log';
+import { JogSection } from './jog-section';
 import { JobBar } from './job-bar';
 import { JobSection } from './job-section';
 import { formatCoordinate } from './machine-format';
@@ -24,6 +25,7 @@ import { PositionSection } from './position-section';
     ConnectionSection,
     PositionSection,
     JobSection,
+    JogSection,
     ConsoleLog,
     JobBar,
   ],
@@ -34,6 +36,9 @@ import { PositionSection } from './position-section';
       </app-panel-section>
       <app-panel-section left heading="Position">
         <app-position-section />
+      </app-panel-section>
+      <app-panel-section left heading="Jog">
+        <app-jog-section />
       </app-panel-section>
       <app-panel-section left heading="Job">
         <app-job-section />
