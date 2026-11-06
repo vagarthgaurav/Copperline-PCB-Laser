@@ -58,6 +58,16 @@ const LASER_CONE = { radius: 1.6, height: 4 };
 /** Top of the laser head housing: the highest point of the scene, for the clip planes. */
 const SCENE_TOP = LASER_TIP_Z + LASER_CONE.height * 2;
 
+/** Hole label size and distance below the hole centre, in mm; and its cell in the atlas, in px. */
+const LABEL = { w: 8, h: 4, offset: 4.5 };
+const ATLAS_CELL = { w: 64, h: 32 };
+
+/** Row 0 is A; letters repeat as AA, AB... past Z. */
+function rowLetter(index: number): string {
+  const letter = String.fromCharCode(65 + (index % 26));
+  return index < 26 ? letter : letter + letter;
+}
+
 /** Share of the way from the floor colour to the peg colour used for the hole grid. */
 const HOLE_BLEND = 0.5;
 
@@ -121,6 +131,9 @@ export class PegBoardScene implements PegBoardSceneApi {
   });
   private readonly laserMat = new THREE.MeshBasicMaterial();
   private readonly beamMat = new THREE.LineBasicMaterial();
+
+  private readonly labelMat = new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false });
+  private labelTexture: THREE.CanvasTexture | null = null;
 
   private palette: ScenePalette | null = null;
   private state: SceneState | null = null;
@@ -281,6 +294,8 @@ export class PegBoardScene implements PegBoardSceneApi {
     ]) {
       material.dispose();
     }
+    this.labelMat.dispose();
+    this.labelTexture?.dispose();
     this.renderer.dispose();
   }
 
@@ -313,6 +328,72 @@ export class PegBoardScene implements PegBoardSceneApi {
     }
     discs.instanceMatrix.needsUpdate = true;
     this.floorGroup.add(discs);
+    this.buildHoleLabels();
+  }
+
+  /**
+   * A unique label ("A1" = lower-left hole, letter = row, number = column) under every hole,
+   * flat on the floor. All labels share one atlas texture and one mesh. White text on a
+   * transparent canvas, tinted by `labelMat`.
+   */
+  private buildHoleLabels(): void {
+    const { holesX, holesY, holePitch } = PEG_BOARD;
+    const count = holesX * holesY;
+    const cols = Math.ceil(Math.sqrt(count * 2));
+    const rows = Math.ceil(count / cols);
+    const canvas = document.createElement('canvas');
+    canvas.width = cols * ATLAS_CELL.w;
+    canvas.height = rows * ATLAS_CELL.h;
+    let ctx: CanvasRenderingContext2D | null = null;
+    try {
+      ctx = canvas.getContext('2d');
+    } catch {
+      ctx = null;
+    }
+    if (!ctx) return;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `bold ${ATLAS_CELL.h * 0.7}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    const positions = new Float32Array(count * 12);
+    const uvs = new Float32Array(count * 12);
+    let n = 0;
+    for (let j = 0; j < holesY; j++) {
+      for (let i = 0; i < holesX; i++, n++) {
+        const cx = (n % cols) * ATLAS_CELL.w;
+        const cy = Math.floor(n / cols) * ATLAS_CELL.h;
+        ctx.fillText(rowLetter(j) + (i + 1), cx + ATLAS_CELL.w / 2, cy + ATLAS_CELL.h / 2 + 1);
+
+        const x0 = i * holePitch - LABEL.w / 2;
+        const y0 = j * holePitch - LABEL.offset - LABEL.h / 2;
+        const u0 = (n % cols) / cols;
+        const u1 = u0 + 1 / cols;
+        const v1 = 1 - Math.floor(n / cols) / rows;
+        const v0 = v1 - 1 / rows;
+        const x1 = x0 + LABEL.w;
+        const y1 = y0 + LABEL.h;
+        positions.set([x0, y0, x1, y0, x1, y1, x0, y0, x1, y1, x0, y1], n * 12);
+        uvs.set([u0, v0, u1, v0, u1, v1, u0, v0, u1, v1, u0, v1], n * 12);
+      }
+    }
+    // Two triangles per quad, with z set below.
+    const xyz = new Float32Array(count * 18);
+    for (let k = 0; k < count * 6; k++) {
+      xyz[k * 3] = positions[k * 2];
+      xyz[k * 3 + 1] = positions[k * 2 + 1];
+      xyz[k * 3 + 2] = 0.02;
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(xyz, 3));
+    geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    this.labelTexture = texture;
+    this.labelMat.map = texture;
+    this.labelMat.needsUpdate = true;
+    this.floorGroup.add(new THREE.Mesh(geometry, this.labelMat));
   }
 
   /** Board geometry in board coordinates; `placeBoard` positions the group. */
@@ -536,6 +617,7 @@ export class PegBoardScene implements PegBoardSceneApi {
     this.floorMat.color.set(p.floor);
     this.pegMat.color.set(p.peg);
     this.holeMat.color.set(p.floor).lerp(new THREE.Color(p.peg), HOLE_BLEND);
+    this.labelMat.color.set(p.board);
     this.boardMat.color.set(p.board);
     this.copperMat.color.set(p.copper);
     this.drillMat.color.set(p.bg);

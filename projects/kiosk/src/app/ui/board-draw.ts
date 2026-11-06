@@ -148,12 +148,34 @@ export function drawFloor(ctx: CanvasRenderingContext2D, view: FloorView, palett
       ctx.fill();
     }
   }
+  drawHoleLabels(ctx, view, palette, radius);
   const origin = toCanvas(view, 0, 0);
   ctx.strokeStyle = palette.laser;
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.arc(origin.x, origin.y, radius + 3, 0, Math.PI * 2);
   ctx.stroke();
+}
+
+/** Row letter + column number of a hole: "A1" is the origin hole, "B3" is row 2, column 3. */
+export function holeLabel(ix: number, iy: number): string {
+  const letter = String.fromCharCode(65 + (iy % 26));
+  return (iy < 26 ? letter : letter + letter) + (ix + 1);
+}
+
+/** Writes a unique label under every hole, as small as the pitch needs. */
+function drawHoleLabels(ctx: CanvasRenderingContext2D, view: FloorView, palette: ScenePalette, radius: number): void {
+  const font = Math.max(5, Math.min(10, PEG_BOARD.holePitch * view.scale * 0.42));
+  ctx.fillStyle = palette.board;
+  ctx.font = `bold ${font}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  for (let ix = 0; ix < PEG_BOARD.holesX; ix++) {
+    for (let iy = 0; iy < PEG_BOARD.holesY; iy++) {
+      const p = toCanvas(view, ix * PEG_BOARD.holePitch, iy * PEG_BOARD.holePitch);
+      ctx.fillText(holeLabel(ix, iy), p.x, p.y + radius + 1);
+    }
+  }
 }
 
 /** Draws the laser head as a ring with a dot. */
