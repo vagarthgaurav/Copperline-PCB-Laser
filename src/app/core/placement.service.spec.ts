@@ -11,12 +11,12 @@ import {
 import { floorBounds } from './peg-board';
 
 const BOUNDS = { minX: 126, minY: -114, maxX: 164, maxY: -76 };
-const BLANK = { minX: 122, minY: -118, maxX: 168, maxY: -72 };
+const BLANK = { minX: 122, minY: -123, maxX: 173, maxY: -72 };
 const HOLES: PegHole[] = [
   { x: 125, y: -75, diameter: 2.2 },
-  { x: 125, y: -115, diameter: 2.2 },
-  { x: 165, y: -75, diameter: 2.2 },
-  { x: 165, y: -115, diameter: 2.2 },
+  { x: 125, y: -120, diameter: 2.2 },
+  { x: 170, y: -75, diameter: 2.2 },
+  { x: 170, y: -120, diameter: 2.2 },
 ];
 
 describe('PlacementService', () => {
@@ -118,16 +118,16 @@ describe('PlacementService', () => {
       );
       for (const hole of HOLES) {
         const p = applyAffine(m, hole.x, hole.y);
-        expect(Math.abs(p.x - Math.round(p.x / 10) * 10)).toBeLessThanOrEqual(0.01);
-        expect(Math.abs(p.y - Math.round(p.y / 10) * 10)).toBeLessThanOrEqual(0.01);
+        expect(Math.abs(p.x - Math.round(p.x / 15) * 15)).toBeLessThanOrEqual(0.01);
+        expect(Math.abs(p.y - Math.round(p.y / 15) * 15)).toBeLessThanOrEqual(0.01);
       }
     }
 
     it('snaps a requested offset onto the grid and reports the pitch', () => {
       const service = load(HOLES);
-      expect(service.snapPitch()).toBe(10);
+      expect(service.snapPitch()).toBe(15);
       service.setOffset(3.3, 4.4);
-      expect([service.offsetX(), service.offsetY()]).toEqual([1, 1]);
+      expect([service.offsetX(), service.offsetY()]).toEqual([1, 6]);
     });
 
     it('snaps the current offset when the design loads', () => {
@@ -135,7 +135,7 @@ describe('PlacementService', () => {
       service.setOffset(3.3, 4.4);
       expect([service.offsetX(), service.offsetY()]).toEqual([3.3, 4.4]);
       load(HOLES);
-      expect([service.offsetX(), service.offsetY()]).toEqual([1, 1]);
+      expect([service.offsetX(), service.offsetY()]).toEqual([1, 6]);
     });
 
     it('keeps every hole on the grid after rotating and flipping', () => {
@@ -154,15 +154,15 @@ describe('PlacementService', () => {
       expectHolesOnGrid(service);
       service.setSide('top');
       expectHolesOnGrid(service);
-      expect(service.snapPitch()).toBe(10);
+      expect(service.snapPitch()).toBe(15);
     });
 
     it('moves one grid step per nudge of one pitch', () => {
       const service = load(HOLES);
       service.setOffset(3.3, 4.4);
-      service.nudge(10, 0);
-      service.nudge(0, -10);
-      expect([service.offsetX(), service.offsetY()]).toEqual([11, -9]);
+      service.nudge(15, 0);
+      service.nudge(0, -15);
+      expect([service.offsetX(), service.offsetY()]).toEqual([16, -9]);
     });
 
     it('places freely when the design has no peg holes', () => {
@@ -232,8 +232,8 @@ describe('PlacementService', () => {
       );
       for (const hole of HOLES) {
         const p = applyAffine(m, hole.x, hole.y);
-        expect(Math.abs(p.x - Math.round(p.x / 10) * 10)).toBeLessThanOrEqual(0.01);
-        expect(Math.abs(p.y - Math.round(p.y / 10) * 10)).toBeLessThanOrEqual(0.01);
+        expect(Math.abs(p.x - Math.round(p.x / 15) * 15)).toBeLessThanOrEqual(0.01);
+        expect(Math.abs(p.y - Math.round(p.y / 15) * 15)).toBeLessThanOrEqual(0.01);
       }
     }
 
@@ -242,22 +242,23 @@ describe('PlacementService', () => {
       service.setOffset(-5000, 5000);
       expectOnFloor(service);
       expectHolesOnGrid(service);
-      // Blank lower-left is at offset + (-4, -4): lowest x is -16, lowest lattice (10k + 1) is -9.
-      expect(service.offsetX()).toBe(-9);
-      expect(service.offsetY()).toBe(231);
+      // Blank lower-left is at offset + (-4, -9) on a floor from -15: lowest x offset is -11,
+      // lowest lattice (15k + 1) is 1. Highest y offset is 273, highest lattice (15k + 6) is 261.
+      expect(service.offsetX()).toBe(1);
+      expect(service.offsetY()).toBe(261);
     });
 
     it('pulls a far-away offset inside the floor when placing freely', () => {
       const service = load([]);
       service.setOffset(-5000, 5000);
-      expect([service.offsetX(), service.offsetY()]).toEqual([-16, 238]);
+      expect([service.offsetX(), service.offsetY()]).toEqual([-11, 273]);
     });
 
     it('keeps the board on the floor when nudged against an edge', () => {
       const service = load(HOLES);
       service.setOffset(-5000, 0);
-      service.nudge(-10, 0);
-      expect(service.offsetX()).toBe(-9);
+      service.nudge(-15, 0);
+      expect(service.offsetX()).toBe(1);
       expectOnFloor(service);
     });
 

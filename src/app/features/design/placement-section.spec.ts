@@ -15,9 +15,9 @@ describe('PlacementSection', () => {
   } as const;
   const templateHoles = [
     { x: 125, y: -75, diameter: 2.2 },
-    { x: 125, y: -115, diameter: 2.2 },
-    { x: 165, y: -75, diameter: 2.2 },
-    { x: 165, y: -115, diameter: 2.2 },
+    { x: 125, y: -120, diameter: 2.2 },
+    { x: 170, y: -75, diameter: 2.2 },
+    { x: 170, y: -120, diameter: 2.2 },
   ];
 
   async function setup(loaded: boolean, overrides: Partial<ParsedProject> = {}) {
@@ -128,13 +128,13 @@ describe('PlacementSection', () => {
 
     it('says the board snaps to the peg grid', async () => {
       const { el, placement } = await setup(true, snapped);
-      expect(el.querySelector('.status')?.textContent).toBe('Snapped to the 10 mm peg grid');
-      expect(placement.snapPitch()).toBe(10);
+      expect(el.querySelector('.status')?.textContent).toBe('Snapped to the 15 mm peg grid');
+      expect(placement.snapPitch()).toBe(15);
     });
 
     it('applies a typed offset when the field is committed and shows the snapped value', async () => {
       const { placement, inputs, type, commit } = await setup(true, snapped);
-      expect(inputs().map((i) => i.value)).toEqual(['1', '1']);
+      expect(inputs().map((i) => i.value)).toEqual(['1', '6']);
       await type(inputs()[0], '33');
       expect(placement.offsetX()).toBe(1);
       expect(inputs()[0].value).toBe('33');
@@ -143,8 +143,8 @@ describe('PlacementSection', () => {
       expect(inputs()[0].value).toBe('31');
       await type(inputs()[1], '4.4');
       await commit(inputs()[1]);
-      expect(placement.offsetY()).toBe(1);
-      expect(inputs()[1].value).toBe('1');
+      expect(placement.offsetY()).toBe(6);
+      expect(inputs()[1].value).toBe('6');
     });
 
     it('shows the snapped value even when it equals the previous offset', async () => {
@@ -157,7 +157,7 @@ describe('PlacementSection', () => {
   });
 
   describe('on the floor', () => {
-    const blank = { minX: 122, minY: -118, maxX: 168, maxY: -72 };
+    const blank = { minX: 122, minY: -123, maxX: 173, maxY: -72 };
 
     it('shows the clamped value after committing a far-out number (free placement)', async () => {
       const { placement, inputs, type, commit } = await setup(true, {
@@ -168,13 +168,13 @@ describe('PlacementSection', () => {
       expect(placement.offsetX()).toBe(0);
       expect(inputs()[0].value).toBe('9999');
       await commit(inputs()[0]);
-      // Floor maxX 480 minus the blank's right edge at +42 from the offset.
-      expect(placement.offsetX()).toBe(438);
-      expect(inputs()[0].value).toBe('438');
+      // Floor maxX 405 minus the blank's right edge at +47 from the offset.
+      expect(placement.offsetX()).toBe(358);
+      expect(inputs()[0].value).toBe('358');
       await type(inputs()[1], '-500');
       await commit(inputs()[1]);
-      expect(placement.offsetY()).toBe(-16);
-      expect(inputs()[1].value).toBe('-16');
+      expect(placement.offsetY()).toBe(-6);
+      expect(inputs()[1].value).toBe('-6');
     });
 
     it('shows the clamped, snapped value after committing a far-out number on the peg grid', async () => {
@@ -185,8 +185,8 @@ describe('PlacementSection', () => {
       });
       await type(inputs()[0], '-500');
       await commit(inputs()[0]);
-      expect(placement.offsetX()).toBe(-9);
-      expect(inputs()[0].value).toBe('-9');
+      expect(placement.offsetX()).toBe(1);
+      expect(inputs()[0].value).toBe('1');
     });
   });
 
