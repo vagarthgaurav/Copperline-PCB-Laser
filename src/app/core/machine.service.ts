@@ -3,7 +3,14 @@ import { invoke } from '@tauri-apps/api/core';
 import { UnlistenFn, listen } from '@tauri-apps/api/event';
 import { MachineStatus } from '../ui/status-chip/status-chip';
 import { GcodeService } from './gcode.service';
-import { describeAlarm, parseAlarmCode, parseStatusReport } from './machine-protocol';
+import {
+  describeAlarm,
+  describeError,
+  parseAlarmCode,
+  parseErrorCode,
+  parseSettingLine,
+  parseStatusReport,
+} from './machine-protocol';
 import { isTauri } from './tauri';
 
 /** grblHAL's USB serial default; the baud rate is ignored by USB CDC but required by the port API. */
@@ -14,6 +21,9 @@ export const MAX_CONSOLE_LINES = 500;
 
 /** How often the machine is asked for its state and position (ms). */
 export const STATUS_POLL_MS = 250;
+
+/** How long a settings read or write waits for the machine's reply (ms). */
+export const SETTINGS_REPLY_MS = 3000;
 
 /** grblHAL real-time bytes. */
 const RT_STATUS = 0x3f;
@@ -87,6 +97,11 @@ export class MachineService {
   private readonly _error = signal<string | null>(null);
   private readonly _busy = signal(false);
   private unlisten: UnlistenFn[] = [];
+  private readonly _settings = signal<Record<number, string>>({});
+  private readonly _settingsLoading = signal(false);
+  private readonly _settingsError = signal<string | null>(null);
+  /** Resolves with the machine's next `ok` or `error:n` reply; null when no command waits for one. */
+  private replyWaiter: ((reply: { error: number | null }) => void) | null = null;
 
   readonly ports = this._ports.asReadonly();
   readonly port = this._port.asReadonly();
@@ -105,6 +120,12 @@ export class MachineService {
   readonly jogStep = this._jogStep.asReadonly();
   /** Feed rate of a jog, mm/min. */
   readonly jogFeed = this._jogFeed.asReadonly();
+  /** Settings read from the machine (`$$`), by number, as the machine wrote them. Empty until read. */
+  readonly settings = this._settings.asReadonly();
+  /** True while the settings are being read. */
+  readonly settingsLoading = this._settingsLoading.asReadonly();
+  /** Why the last settings read or write failed; cleared by the next one. */
+  readonly settingsError = this._settingsError.asReadonly();
   /** Why the last port, connect or send action failed; cleared by the next one. */
   readonly error = this._error.asReadonly();
   /** True while a connect or disconnect is under way. */
@@ -261,7 +282,74 @@ export class MachineService {
     }
   }
 
+  /** Reads every setting with `$$`. The lines fill `settings` instead of the console. */
+  async loadSettings(): Promise<void> {
+    if (!isTauri() || this._connection() === 'disconnected' || this._settingsLoading()) {
+      return;
+    }
+    this._settingsError.set(null);
+    this._settingsLoading.set(true);
+    this._settings.set({});
+    const reply = await this.sendAndWait('$$');
+    this._settingsLoading.set(false);
+    if (reply === null) {
+      this._settingsError.set('The machine did not answer. Try again.');
+    } else if (reply.error !== null) {
+      this._settingsError.set(describeError(reply.error));
+    }
+  }
+
+  /** Writes one setting (`$130=375`). The machine stores it at once; returns true when it accepted it. */
+  async writeSetting(id: number, value: string): Promise<boolean> {
+    if (!isTauri() || this._connection() === 'disconnected' || this._settingsLoading()) {
+      return false;
+    }
+    this._settingsError.set(null);
+    const reply = await this.sendAndWait(`$${id}=${value}`);
+    if (reply === null) {
+      this._settingsError.set('The machine did not answer. Try again.');
+      return false;
+    }
+    if (reply.error !== null) {
+      this._settingsError.set(`$${id}: ${describeError(reply.error)}`);
+      return false;
+    }
+    this._settings.update((settings) => ({ ...settings, [id]: value }));
+    return true;
+  }
+
+  /** Sends a line and waits for the machine's `ok` or `error:n`; null on timeout. */
+  private async sendAndWait(command: string): Promise<{ error: number | null } | null> {
+    const reply = new Promise<{ error: number | null } | null>((resolve) => {
+      const timer = setTimeout(() => {
+        this.replyWaiter = null;
+        resolve(null);
+      }, SETTINGS_REPLY_MS);
+      this.replyWaiter = (result) => {
+        clearTimeout(timer);
+        this.replyWaiter = null;
+        resolve(result);
+      };
+    });
+    await this.send(command);
+    return reply;
+  }
+
   private onLine(line: string): void {
+    const waiter = this.replyWaiter;
+    if (waiter !== null) {
+      if (line.trim() === 'ok') {
+        this.log(line);
+        waiter({ error: null });
+        return;
+      }
+      const error = parseErrorCode(line);
+      if (error !== null) {
+        this.log(line);
+        waiter({ error });
+        return;
+      }
+    }
     const report = parseStatusReport(line);
     if (report !== null) {
       // Status reports arrive several times a second; they feed the UI, not the console.
@@ -273,6 +361,14 @@ export class MachineService {
         this._position.set(report.position);
       }
       return;
+    }
+    if (this._settingsLoading()) {
+      const setting = parseSettingLine(line);
+      if (setting !== null) {
+        // A `$$` answer has about a hundred lines; keep them out of the console.
+        this._settings.update((settings) => ({ ...settings, [setting.id]: setting.value }));
+        return;
+      }
     }
     const code = parseAlarmCode(line);
     if (code !== null) {
@@ -317,6 +413,9 @@ export class MachineService {
     this.stopPolling();
     this._machineState.set(null);
     this._alarmCode.set(null);
+    this._settings.set({});
+    this._settingsLoading.set(false);
+    this.replyWaiter?.({ error: 3 });
     this._connection.set('disconnected');
     this._jobState.set('idle');
     this._position.set(null);

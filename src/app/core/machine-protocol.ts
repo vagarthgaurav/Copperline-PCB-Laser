@@ -51,3 +51,26 @@ const ALARMS: Record<number, string> = {
 export function describeAlarm(code: number | null): string {
   return code === null ? 'The machine is locked.' : (ALARMS[code] ?? `Alarm ${code}.`);
 }
+
+/** `$130=375.000` gives `{ id: 130, value: '375.000' }`; any other line gives null. A trailing `; comment` is dropped. */
+export function parseSettingLine(line: string): { id: number; value: string } | null {
+  const match = /^\$(\d+)=([^;\s]*)/.exec(line.trim());
+  return match === null ? null : { id: Number(match[1]), value: match[2] };
+}
+
+/** `error:8` gives 8; any other line gives null. */
+export function parseErrorCode(line: string): number | null {
+  const match = /^error:(\d+)$/.exec(line.trim());
+  return match === null ? null : Number(match[1]);
+}
+
+const ERRORS: Record<number, string> = {
+  3: 'The machine does not know this setting.',
+  4: 'The machine does not accept a negative value here.',
+  8: 'The machine must be idle to change settings.',
+  9: 'The machine is locked by an alarm. Unlock it first.',
+};
+
+export function describeError(code: number): string {
+  return ERRORS[code] ?? `The machine refused it (error ${code}).`;
+}

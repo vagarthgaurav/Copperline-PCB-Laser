@@ -18,11 +18,25 @@ describe('MachinePage', () => {
     const [left, right] = Array.from(el.querySelectorAll('app-panel'));
     const headings = (panel: Element) => Array.from(panel.querySelectorAll('h2')).map((h) => h.textContent?.trim());
     expect(headings(left)).toEqual(['Connection', 'Position', 'Jog', 'Job', 'Console']);
+    expect(Array.from(left.querySelectorAll('[role="tab"]')).map((t) => t.textContent?.trim())).toEqual([
+      'Control',
+      'Settings',
+    ]);
     expect(headings(right)).toEqual(['Current move', 'G-code']);
     expect(left.textContent).toContain('No serial ports found. Plug in the machine and reopen this screen.');
     expect(left.textContent).toContain('No job running. Load a Gerber in Design to prepare one.');
     expect(left.textContent).toContain('No machine output yet.');
     expect(right.textContent).toContain('Nothing streaming. Start a job to see live G-code.');
+  });
+
+  it('switches the left panel to the settings tab', async () => {
+    const { harness, el } = await setup();
+    const tab = el.querySelectorAll<HTMLButtonElement>('[role="tab"]')[1];
+    tab.click();
+    harness.detectChanges();
+    expect(tab.getAttribute('aria-selected')).toBe('true');
+    expect(el.querySelector('app-settings-section')).not.toBeNull();
+    expect(el.querySelector('app-jog-section')).toBeNull();
   });
 
   it('labels the panels and puts the read-only viewport and job bar in main', async () => {

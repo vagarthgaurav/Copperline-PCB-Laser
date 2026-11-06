@@ -1,4 +1,4 @@
-import { describeAlarm, parseAlarmCode, parseStatusReport } from './machine-protocol';
+import { describeAlarm, describeError, parseAlarmCode, parseErrorCode, parseSettingLine, parseStatusReport } from './machine-protocol';
 
 describe('parseStatusReport', () => {
   it('reads the state and machine position', () => {
@@ -35,5 +35,21 @@ describe('alarms', () => {
     expect(describeAlarm(10)).toContain('Emergency stop');
     expect(describeAlarm(99)).toBe('Alarm 99.');
     expect(describeAlarm(null)).toBe('The machine is locked.');
+  });
+});
+
+describe('settings lines', () => {
+  it('parses a setting and drops a comment', () => {
+    expect(parseSettingLine('$130=375.000')).toEqual({ id: 130, value: '375.000' });
+    expect(parseSettingLine('$0=5.0          ; Step pulse length')).toEqual({ id: 0, value: '5.0' });
+    expect(parseSettingLine('ok')).toBeNull();
+    expect(parseSettingLine('$I')).toBeNull();
+  });
+
+  it('parses errors', () => {
+    expect(parseErrorCode('error:8')).toBe(8);
+    expect(parseErrorCode('ok')).toBeNull();
+    expect(describeError(8)).toContain('idle');
+    expect(describeError(99)).toContain('99');
   });
 });
